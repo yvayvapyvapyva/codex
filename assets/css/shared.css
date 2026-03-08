@@ -61,5 +61,5 @@ body {
 }
 
 .home-back-btn:active {
-  opacity: 0.85;
+  transform: scale(0.98);
 }

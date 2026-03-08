@@ -23,26 +23,15 @@
         .btn-top:active { transform: scale(0.96); background: #fff; }
         #listPointsBtn { max-width: calc(100% - 84px); }
         #routeLabelText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 56vw; display: inline-block; }
-        .mode-chip { position: absolute; top: calc(env(safe-area-inset-top) + 124px); left: 15px; z-index: 2100; background: rgba(255,255,255,0.95); border: 1px solid var(--border); border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; backdrop-filter: blur(20px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); display: none; pointer-events: none; }
-        .mode-chip.mode-view { color: #6e6e73; }
-        .mode-chip.mode-add { color: var(--warn); }
-        .mode-chip.mode-draw { color: var(--btn); }
-        .history-controls { position: absolute; top: calc(env(safe-area-inset-top) + 124px); right: 15px; z-index: 2100; display: none; gap: 8px; }
-        .btn-history { background: rgba(255,255,255,0.95); color: var(--text); border: 1px solid var(--border); border-radius: 16px; width: 44px; height: 44px; cursor: pointer; font-size: 18px; box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
-        .btn-history:disabled { opacity: 0.45; cursor: default; }
-        .workflow-hint { position: absolute; bottom: calc(106px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(90vw, 360px); z-index: 2100; background: rgba(0,0,0,0.75); color: #fff; border-radius: 16px; padding: 10px 14px; font-size: 13px; line-height: 1.4; display: none; text-align: center; backdrop-filter: blur(8px); }
         .floating-save { position: absolute; right: 16px; bottom: calc(94px + env(safe-area-inset-bottom)); z-index: 2100; display: none; align-items: center; gap: 10px; }
         .floating-save-indicator { background: rgba(0,0,0,0.65); color: #fff; border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
         .floating-save-indicator.clean { background: rgba(52,199,89,0.9); }
-        .btn-save-floating { background: var(--btn); color: #fff; border: none; border-radius: 999px; height: 54px; padding: 0 18px; font-weight: 800; font-size: 15px; box-shadow: 0 10px 30px rgba(0,122,255,0.35); cursor: pointer; }
-        .btn-save-floating:disabled { opacity: 0.65; cursor: default; }
         
         .bottom-center-controls { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 2000; display: none; flex-direction: column; align-items: center; width: auto; max-width: 90%; }
         .btn-add-main { background: var(--btn); color: #fff; padding: 18px 32px; border-radius: 35px; font-weight: 700; border: none; box-shadow: 0 10px 30px rgba(0,122,255,0.3); cursor: pointer; font-size: 16px; transition: 0.3s; width: max-content; white-space: nowrap; }
         @media (max-width: 430px) {
             .floating-save { right: 10px; bottom: calc(104px + env(safe-area-inset-bottom)); }
-            .floating-save-indicator { display: none; }
-            .btn-save-floating { height: 50px; padding: 0 14px; font-size: 14px; }
+            .floating-save-indicator { font-size: 11px; padding: 6px 10px; }
             .btn-add-main { font-size: 14px; padding: 16px 22px; }
         }
         .modal { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.3); display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(10px); }
@@ -92,11 +81,8 @@
 <div id="welcomeScreen"><div class="welcome-card"><h2 style="margin: 0 0 8px 0; font-weight:800;">Route Editor</h2><div id="userIdBadge" style="background:#f2f2f7;color:#8e8e93;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:18px">Загрузка...</div><div class="input-wrapper" style="margin-bottom:10px;"><input id="tokenInput" type="password" placeholder="Введите GitHub token" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="tokenLoginBtn" style="background:var(--btn); color:#fff; border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="submitToken()">Войти</button></div><div style="font-size:13px; color:#8e8e93; margin-top:6px;">Токен нужно вводить при каждом запуске</div></div></div>
 <div id="map"></div>
 <div class="top-controls" id="uiControls" style="display:none"><button id="listPointsBtn" class="btn-top" onclick="openPointsOrderModal()" style="visibility:hidden"><span>📋</span> <span id="routeLabelText">Маршрут</span></button><button class="btn-top" onclick="openSettingsModal()"><span>⚙️</span></button></div>
-<div id="modeChip" class="mode-chip mode-view">Режим: просмотр</div>
-<div id="historyControls" class="history-controls"><button id="undoBtn" class="btn-history" onclick="undoHistory()" title="Отменить" disabled>↶</button><button id="redoBtn" class="btn-history" onclick="redoHistory()" title="Повторить" disabled>↷</button></div>
 <div class="bottom-center-controls" id="bottomControls"><button id="addMarkerBtn" class="btn-add-main" onclick="handleAddBtnClick()" style="visibility:hidden"><span id="addText">Добавить новую точку</span></button></div>
-<div id="workflowHint" class="workflow-hint"></div>
-<div id="floatingSave" class="floating-save"><div id="saveStateBadge" class="floating-save-indicator">Сохранено</div><button id="floatingSaveBtn" class="btn-save-floating" onclick="saveGist()">Сохранить</button></div>
+<div id="floatingSave" class="floating-save"><div id="saveStateBadge" class="floating-save-indicator">Есть несохраненные изменения</div></div>
 <div id="dropdownOverlay" class="dropdown-overlay" onclick="closeD()"></div>
 <div id="listColorDropdown" class="color-dropdown"></div>
 
@@ -111,7 +97,7 @@ const USER_UNAME = tgU?.username ? `@${tgU.username}` : "", GIST_DESC = `[${USER
 const COLORS = { Gold: { hex: '#FFD700', label: 'Маневры на перекрестке' }, Blue: { hex: '#007AFF', label: 'Разворот вне перекрестка' }, Red: { hex: '#FF3B30', label: 'Разгон до максимальной скорости' }, Fuchsia: { hex: '#AF52DE', label: 'Остановка и начало движения на подъем' }, Orange: { hex: '#FF9500', label: 'Левые и правые повороты' }, Purple: { hex: '#5856D6', label: 'Параллельная парковка и гараж' }, Cyan: { hex: '#5AC8FA', label: 'Разворот в ограниченном пространстве' }, Brown: { hex: '#A2845E', label: 'Остановка' }, Lime: { hex: '#34C759', label: 'Начало движения' } };
 const COMMAND_SETS = { Gold: ["На перекрестке повернем налево", "На перекрестке едем прямо", "На перекрестке повернем направо", "На перекрестке выполним разворот", "На круговом движении первый съезд", "На круговом движении второй съезд", "На круговом движении третий съезд", "На круговом движении четвертый съезд", "На круговом движении выполним разворот", "На регулируемом перекрестке повернем налево", "На регулируемом перекрестке едем прямо", "На регулируемом перекрестке повернем направо", "На регулируемом перекрестке выполним разворот", "На нерегулируемом перекрестке повернем налево", "На нерегулируемом перекрестке едем прямо", "На нерегулируемом перекрестке повернем направо", "На нерегулируемом перекрестке выполним разворот", "Выполним разворот в ближайшем разрешенном месте"], Blue: ["Выполним разворот вне перекрестка", "Выполним разворот в ближайшем разрешенном месте", "Найдите место для разворота и развернитесь"], Red: ["Выполняем разгон до максимальной скорости", "Набираем максимальную скорость на данном участке дороги", "Разгоняемся до максимальной разрешенной скорости"], Fuchsia: ["По моей команде выполним остановку и начало движения на подъеме", "Выполняем остановку и начало движения на подъеме"], Orange: ["Поворачиваем направо", "Поворачиваем налево", "Далее повернем направо", "Далее повернем налево", "На светофоре повернем направо", "На светофоре повернем налево", "Поворачиваем направо к ленте", "Поворачиваем направо на заправку", "Едем в прямом направлении"], Purple: ["Выполняем параллельную парковку и гараж"], Cyan: ["Выполняем разворот в ограниченном пространстве", "Выполним разворот в ограниченном пространстве с использованием передачи заднего хода"], Brown: ["Выполняем остановку параллельно краю проезжей части", "Выполняем остановку в ближайшем разрешенном месте"], Lime: ["Начинаем движение", "Как будете готовы начинаем движение"] };
 let map, points = [], cur = null, isAdd = false, isDrawing = false, curFile = null, userGistId = null, activeListPoint = null, modalMode = 'list', tempNewPointData = null, userLocPlacemark = null, activePoint = null, authToken = "";
-let historyStack = [], historyIndex = -1, lastSavedSnapshot = "[]", hintTimer = null, toastTimer = null;
+let historyStack = [], historyIndex = -1, lastSavedSnapshot = "[]", toastTimer = null;
 
 const showToast = (text, type = 'info', duration = 2200) => {
     const el = $('toast');
@@ -148,8 +134,7 @@ const clearRouteObjects = () => {
     activePoint = null;
 };
 const updateHistoryButtons = () => {
-    $('undoBtn').disabled = historyIndex <= 0;
-    $('redoBtn').disabled = historyIndex >= historyStack.length - 1;
+    return;
 };
 const seedHistory = () => {
     historyStack = [serializePoints()];
@@ -167,12 +152,10 @@ const pushHistorySnapshot = () => {
 const updateSaveState = () => {
     const hasRoute = curFile !== null;
     const isDirty = hasRoute && serializePoints() !== lastSavedSnapshot;
-    $('floatingSave').style.display = hasRoute ? 'flex' : 'none';
+    $('floatingSave').style.display = isDirty ? 'flex' : 'none';
     if (!hasRoute) return;
     const badge = $('saveStateBadge');
-    badge.textContent = isDirty ? 'Есть изменения' : 'Сохранено';
-    badge.classList.toggle('clean', !isDirty);
-    $('floatingSaveBtn').disabled = !isDirty;
+    badge.textContent = 'Есть несохраненные изменения';
 };
 const syncActiveListCard = () => {
     document.querySelectorAll('.sortable-point-item').forEach(card => {
@@ -198,37 +181,6 @@ const applySnapshot = (snapshot) => {
     setActivePoint(null);
     updateSaveState();
 };
-function undoHistory() {
-    if (historyIndex <= 0) return;
-    historyIndex -= 1;
-    applySnapshot(historyStack[historyIndex]);
-    updateHistoryButtons();
-    showToast('Действие отменено', 'info');
-}
-function redoHistory() {
-    if (historyIndex >= historyStack.length - 1) return;
-    historyIndex += 1;
-    applySnapshot(historyStack[historyIndex]);
-    updateHistoryButtons();
-    showToast('Действие повторено', 'info');
-}
-const showHint = (text, hold = false) => {
-    const hint = $('workflowHint');
-    if (hintTimer) clearTimeout(hintTimer);
-    if (!text) { hint.style.display = 'none'; return; }
-    hint.textContent = text;
-    hint.style.display = 'block';
-    if (!hold) hintTimer = setTimeout(() => hint.style.display = 'none', 3200);
-};
-const updateModeUI = () => {
-    const chip = $('modeChip');
-    let modeText = 'Режим: просмотр', modeClass = 'mode-view';
-    if (isDrawing) { modeText = 'Режим: рисование пути'; modeClass = 'mode-draw'; }
-    else if (isAdd) { modeText = 'Режим: добавление точки'; modeClass = 'mode-add'; }
-    chip.textContent = modeText;
-    chip.className = `mode-chip ${modeClass}`;
-};
-
 ymaps.ready(() => {
     tg.expand();
     if (tg.requestFullscreen) {
@@ -237,7 +189,6 @@ ymaps.ready(() => {
     if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
     if (tg.setHeaderColor) tg.setHeaderColor('secondary_bg_color');
     $('userIdBadge').textContent = `ID: ${USER_ID}`;
-    updateModeUI();
     map = new ymaps.Map("map", { center: [56.3399, 43.9332], zoom: 17, type: 'yandex#satellite', controls: [] });
     userLocPlacemark = new ymaps.Placemark([0,0], {}, { iconLayout: 'default#image', iconImageHref: getUserLocSvg(), iconImageSize: [24,24], iconImageOffset: [-12,-12], zIndex: 5000, visible: false });
     map.geoObjects.add(userLocPlacemark); initGeolocation();
@@ -249,7 +200,6 @@ ymaps.ready(() => {
             setActivePoint(newPoint, true);
             startDrawingForPoint(newPoint, true);
             tempNewPointData = null;
-            showHint('Шаг 2/3: нарисуйте путь для точки. Завершите кнопкой "Завершить рисование пути".', true);
         }
     });
     initColorDropdown('listColorDropdown', (h, n) => {
@@ -277,8 +227,6 @@ const handleInitialAuth = async () => {
         $('welcomeScreen').style.display = 'none'; 
         $('uiControls').style.display = 'flex'; 
         $('bottomControls').style.display = 'flex'; 
-        $('modeChip').style.display = 'block';
-        $('historyControls').style.display = 'flex';
         seedHistory();
         updateSaveState();
         refreshFileList(); 
@@ -322,7 +270,6 @@ const loadRoute = async (fn) => {
     lastSavedSnapshot = serializePoints();
     updateVisibility();
     setActivePoint(points[0] || null);
-    showHint('');
     showToast(`Загружен: ${fn.replace('.json','')}`, 'success');
 };
 
@@ -343,7 +290,6 @@ function addP(coords, data = null, silent = false) {
         p.pts = p.line.geometry.getCoordinates().map(pt => [f6(pt[0]), f6(pt[1])]);
         if(isDrawing && p.pts.length > 1) {
             $('addText').textContent = "Завершить рисование пути";
-            showHint('Шаг 3/3: завершите рисование кнопкой "Завершить рисование пути".', true);
         }
         updI(p);
         if (p.pts.length > 1) updPI(p);
@@ -368,8 +314,6 @@ const startDrawingForPoint = (p, isNewPoint = false) => {
     setActivePoint(p, true);
     p.line.editor.startDrawing();
     p.pm.options.set('draggable', true);
-    updateModeUI();
-    if (!isNewPoint) showHint('Редактирование пути: после изменений нажмите "Завершить рисование пути".', true);
 };
 const stopDrawingMode = () => {
     if (cur) {
@@ -382,11 +326,9 @@ const stopDrawingMode = () => {
     $('addText').textContent = "Добавить новую точку";
     $('addMarkerBtn').classList.remove('drawing');
     cur = null;
-    showHint('Путь обновлен. При необходимости нажмите "Сохранить".');
-    updateModeUI();
 };
 const handleAddBtnClick = () => { if(isDrawing) stopDrawingMode(); else if(isAdd) stopAdd(); else openCreatePointModal(); };
-const stopAdd = () => { isAdd = false; tempNewPointData = null; $('addText').textContent = "Добавить новую точку"; $('addMarkerBtn').classList.remove('active'); map.setCursor('grab'); showHint(''); updateModeUI(); };
+const stopAdd = () => { isAdd = false; tempNewPointData = null; $('addText').textContent = "Добавить новую точку"; $('addMarkerBtn').classList.remove('active'); map.setCursor('grab'); };
 const updI = p => { p.pm.options.set('iconImageHref', getSvg(COLORS[p.color].hex, p.id, (p.pts?.length >= 2 ? calcA(p.pts[0], p.pts[1]) : 0), false)); };
 function updPI(p) { const pts = p.line.geometry.getCoordinates(); if(!pts.length) return; const last = pts[pts.length-1], prev = pts[pts.length-2]; if(!p.pmEnd) { p.pmEnd = new ymaps.Placemark(last, {}, { iconLayout: 'default#imageWithContent', iconImageSize: [34,34], iconImageOffset: [-17,-17], interactive: false, zIndex: 800 }); map.geoObjects.add(p.pmEnd); } else p.pmEnd.geometry.setCoordinates(last); p.pmEnd.options.set({ iconImageHref: getSvg(COLORS[p.color].hex, p.id, prev ? calcA(prev, last) : 0, true) }); }
 
@@ -436,22 +378,21 @@ function startEditPath(p) {
     p.pm.options.set('draggable', true);
     p.line.editor.startEditing();
     setActivePoint(p, true);
-    showHint('Редактируйте путь и нажмите "Завершить рисование пути".', true);
-    updateModeUI();
 }
 
 function openPointsOrderModal() {
-    modalMode = 'list'; const list = $('pointsSortList'); list.innerHTML = ''; $('orderModalTitle').textContent = curFile ? curFile.replace('.json', '') : "Маршрут"; $('saveBtnText').textContent = "Сохранить в облаке";
+    modalMode = 'list'; const list = $('pointsSortList'); list.innerHTML = ''; $('orderModalTitle').textContent = curFile ? curFile.replace('.json', '') : "Маршрут"; $('saveInListBtn').style.display = 'none';
     if (!points.length) list.innerHTML = '<div style="text-align:center;padding:40px;color:#8e8e93;font-weight:500;">Маршрут пока пуст</div>'; else points.forEach(p => list.appendChild(createPointCard(p)));
     syncActiveListCard();
     toggleM('pointsOrderModal');
 }
 
-function openEditPointModal(p) { modalMode = 'edit'; $('pointsSortList').innerHTML = ''; $('orderModalTitle').textContent = `Точка #${p.id}`; $('saveBtnText').textContent = "Готово"; $('pointsSortList').appendChild(createPointCard(p, true)); syncActiveListCard(); toggleM('pointsOrderModal'); }
+function openEditPointModal(p) { modalMode = 'edit'; $('pointsSortList').innerHTML = ''; $('orderModalTitle').textContent = `Точка #${p.id}`; $('saveInListBtn').style.display = 'block'; $('saveBtnText').textContent = "Готово"; $('pointsSortList').appendChild(createPointCard(p, true)); syncActiveListCard(); toggleM('pointsOrderModal'); }
 function openCreatePointModal() {
     modalMode = 'create';
     $('pointsSortList').innerHTML = '';
     $('orderModalTitle').textContent = "Новая точка";
+    $('saveInListBtn').style.display = 'block';
     $('saveBtnText').textContent = "Поставить на карту";
     tempNewPointData = { id: points.length + 1, color: 'Gold', cmd: COMMAND_SETS.Gold[0], comm: '' };
     $('pointsSortList').appendChild(createPointCard(tempNewPointData, true));
@@ -467,8 +408,6 @@ function handleModalSave() {
         $('addMarkerBtn').classList.add('active');
         $('addText').textContent = "Выберите место на карте";
         map.setCursor('crosshair');
-        showHint('Шаг 1/3: выберите место для новой точки на карте.', true);
-        updateModeUI();
     }
 }
 
@@ -483,7 +422,6 @@ async function saveGist() {
     if(!userGistId || !curFile) return;
     const btn = $('saveInListBtn');
     btn.classList.add('loading');
-    $('floatingSaveBtn').disabled = true;
     showToast('Сохранение...', 'loading', 1200);
     const data = points.map(p => ({ id: p.id, color: p.color, pts: p.pts, cmd: p.cmd, comm: p.comm }));
     if(await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: { content: JSON.stringify(data, null, 2) } } })) {

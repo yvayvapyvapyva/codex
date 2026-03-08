@@ -27,7 +27,7 @@ body {
 }
 
 .card {
-  width: min(92vw, 520px);
+  width: min(94vw, 620px);
   padding: 18px;
   border-radius: 24px;
   background: linear-gradient(180deg, rgba(38,38,44,0.76), rgba(24,24,28,0.64));
@@ -41,7 +41,7 @@ body {
 }
 
 .card.small {
-  width: min(92vw, 460px);
+  width: min(94vw, 500px);
 }
 
 h1 {

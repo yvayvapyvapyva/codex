@@ -23,30 +23,30 @@
         .btn-top:active { transform: scale(0.97); box-shadow: 0 6px 18px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.6); }
         #listPointsBtn { max-width: calc(100% - 84px); }
         #routeLabelText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 56vw; display: inline-block; }
-        .floating-save { position: absolute; top: calc(env(safe-area-inset-top) + 12px); left: 50%; transform: translateX(-50%); z-index: 2300; display: none; align-items: center; pointer-events: none; }
-        .floating-save-indicator { background: linear-gradient(180deg, rgba(255,255,255,0.36), rgba(255,255,255,0.18)); color: #0f172a; border-radius: 16px; padding: 10px 14px; font-size: 13px; font-weight: 700; white-space: nowrap; border: 1px solid rgba(255,255,255,0.58); box-shadow: 0 10px 25px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.65); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); }
-        .floating-save-indicator.clean { background: linear-gradient(180deg, rgba(255,255,255,0.36), rgba(255,255,255,0.18)); }
+        .floating-save { position: absolute; top: calc(env(safe-area-inset-top) + 12px); left: 50%; transform: translateX(-50%); z-index: 2300; display: none; align-items: center; pointer-events: auto; }
+        .btn-save-glass { background: linear-gradient(180deg, rgba(90,173,255,0.42), rgba(10,132,255,0.3)); color: #05396b; border-radius: 16px; padding: 10px 14px; font-size: 13px; font-weight: 800; white-space: nowrap; border: 1px solid rgba(255,255,255,0.62); box-shadow: 0 10px 25px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.65); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); cursor: pointer; transition: transform 0.18s, box-shadow 0.18s; }
+        .btn-save-glass:active { transform: scale(0.98); box-shadow: 0 6px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5); }
         
         .bottom-center-controls { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 2000; display: none; flex-direction: column; align-items: center; width: auto; max-width: 90%; }
         .btn-add-main { background: linear-gradient(180deg, #4da2ff, #0a84ff); color: #fff; padding: 18px 32px; border-radius: 35px; font-weight: 700; border: 1px solid rgba(255,255,255,0.32); box-shadow: 0 12px 34px rgba(10,132,255,0.42), inset 0 1px 0 rgba(255,255,255,0.45); cursor: pointer; font-size: 16px; transition: transform 0.18s, box-shadow 0.18s; width: max-content; white-space: nowrap; }
         .btn-add-main:active { transform: scale(0.98); box-shadow: 0 8px 20px rgba(10,132,255,0.36), inset 0 1px 0 rgba(255,255,255,0.34); }
         @media (max-width: 430px) {
             .floating-save { top: calc(env(safe-area-inset-top) + 10px); }
-            .floating-save-indicator { font-size: 11px; padding: 6px 10px; }
+            .btn-save-glass { font-size: 11px; padding: 8px 10px; }
             .btn-add-main { font-size: 14px; padding: 16px 22px; }
         }
         .modal { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.3); display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(10px); }
-        .modal-content { background: var(--bg-sec); width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; display: flex; flex-direction: column; max-height: 90vh; animation: slideUp 0.4s cubic-bezier(0.2, 1, 0.3, 1); position: relative; padding-bottom: env(safe-area-inset-bottom); }
+        .modal-content { background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(244,248,255,0.68)); width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; display: flex; flex-direction: column; max-height: 90vh; animation: slideUp 0.4s cubic-bezier(0.2, 1, 0.3, 1); position: relative; padding-bottom: env(safe-area-inset-bottom); border: 1px solid rgba(255,255,255,0.62); backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .btn-action { background: linear-gradient(180deg, #4da2ff, #0a84ff); color: #fff; border: 1px solid rgba(255,255,255,0.35); border-radius: 16px; padding: 16px; font-weight: 650; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; width: 100%; box-shadow: 0 12px 24px rgba(10,132,255,0.34), inset 0 1px 0 rgba(255,255,255,0.45); transition: transform 0.18s, box-shadow 0.18s; }
         .btn-action:active { transform: scale(0.98); box-shadow: 0 8px 16px rgba(10,132,255,0.32), inset 0 1px 0 rgba(255,255,255,0.3); }
         .btn-action.loading { background: #e5e5ea !important; color: #8e8e93 !important; pointer-events: none; opacity: 0.7; }
         .btn-action.saved { background: var(--success) !important; }
         .editor-section { padding: 0 20px 20px; overflow-y: auto; box-sizing: border-box; }
-        .settings-group { background: #fff; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--border); overflow: hidden; }
+        .settings-group { background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(246,249,255,0.74)); border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.62); overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.08); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
         .settings-item { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
         input, textarea, select { width: 100%; padding: 14px; border: none; font-size: 16px; outline: none; background: transparent; color: var(--text); font-family: inherit; box-sizing: border-box; }
-        .input-wrapper { background: #fff; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); display: flex; align-items: center; padding-right: 8px; box-sizing: border-box; }
+        .input-wrapper { background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(245,248,255,0.74)); border-radius: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.62); display: flex; align-items: center; padding-right: 8px; box-sizing: border-box; box-shadow: 0 6px 16px rgba(0,0,0,0.08); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         #tokenLoginBtn, #btnCreateFile { background: linear-gradient(180deg, #4da2ff, #0a84ff) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.35) !important; border-radius: 12px !important; box-shadow: 0 10px 20px rgba(10,132,255,0.3), inset 0 1px 0 rgba(255,255,255,0.45) !important; transition: transform 0.18s, box-shadow 0.18s; }
         #tokenLoginBtn:active, #btnCreateFile:active { transform: scale(0.98); box-shadow: 0 6px 14px rgba(10,132,255,0.28), inset 0 1px 0 rgba(255,255,255,0.32) !important; }
         .gist-list { max-height: 250px; overflow-y: auto; }
@@ -65,7 +65,7 @@
         #toast.success { background: rgba(52,199,89,0.95); }
         #toast.error { background: rgba(255,59,48,0.95); }
         #toast.loading { background: rgba(0,122,255,0.95); }
-        .sortable-point-item { background: #fff; padding: 16px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--border); position: relative; box-sizing: border-box; width: 100%; }
+        .sortable-point-item { background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(245,249,255,0.76)); padding: 16px; border-radius: 20px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.62); position: relative; box-sizing: border-box; width: 100%; box-shadow: 0 8px 20px rgba(0,0,0,0.08); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .sortable-point-item.active { border-color: rgba(0,122,255,0.55); box-shadow: 0 0 0 2px rgba(0,122,255,0.15); }
         .sort-handle { position: absolute; top: 12px; right: 12px; color: #d1d1d6; cursor: grab; font-size: 20px; padding: 4px; }
         .item-main-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-right: 35px; width: 100%; box-sizing: border-box; }
@@ -76,7 +76,7 @@
         .section-title { font-size: 12px; font-weight: 600; color: #8e8e93; text-transform: uppercase; margin: 0 0 8px 16px; letter-spacing: 0.5px; display: block; }
         select.cmd-select { background: var(--bg-sec); border-radius: 12px; padding: 10px 12px; font-weight: 500; appearance: none; white-space: normal; height: auto; line-height: 1.3; overflow: visible; flex-grow: 1; width: 10px; }
         /* Обновленные стили для комментария */
-        .comm-input { background: #fafafa; border: 1px solid var(--border); border-radius: 12px; margin-top: 8px; padding: 12px; font-size: 13px; resize: none; width: 100%; display: block; box-sizing: border-box; caret-color: #000; overflow: hidden; min-height: 44px; }
+        .comm-input { background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(247,250,255,0.78)); border: 1px solid rgba(255,255,255,0.65); border-radius: 12px; margin-top: 8px; padding: 12px; font-size: 13px; resize: none; width: 100%; display: block; box-sizing: border-box; caret-color: #000; overflow: hidden; min-height: 44px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7); }
     </style>
 </head>
 <body>
@@ -86,11 +86,11 @@
 <div id="map"></div>
 <div class="top-controls" id="uiControls" style="display:none"><button id="listPointsBtn" class="btn-top" onclick="openPointsOrderModal()" style="visibility:hidden"><span>📋</span> <span id="routeLabelText">Маршрут</span></button><button class="btn-top" onclick="openSettingsModal()"><span>⚙️</span></button></div>
 <div class="bottom-center-controls" id="bottomControls"><button id="addMarkerBtn" class="btn-add-main" onclick="handleAddBtnClick()" style="visibility:hidden"><span id="addText">Добавить новую точку</span></button></div>
-<div id="floatingSave" class="floating-save"><div id="saveStateBadge" class="floating-save-indicator">Есть несохраненные изменения</div></div>
+<div id="floatingSave" class="floating-save"><button id="saveStateBtn" class="btn-save-glass" onclick="saveGist()">Сохранить изменения</button></div>
 <div id="dropdownOverlay" class="dropdown-overlay" onclick="closeD()"></div>
 <div id="listColorDropdown" class="color-dropdown"></div>
 
-<div id="pointsOrderModal" class="modal" onclick="if(event.target===this) toggleM('pointsOrderModal')"><div class="modal-content"><div class="modal-header"><h3 id="orderModalTitle">Маршрут</h3><button class="close-circle" onclick="toggleM('pointsOrderModal')">✕</button></div><div class="editor-section" id="pointsSortList"></div><div style="padding: 20px;"><button id="saveInListBtn" class="btn-action" style="background: var(--success);" onclick="handleModalSave()"><span id="saveBtnText">Сохранить в облаке</span></button></div></div></div>
+<div id="pointsOrderModal" class="modal" onclick="if(event.target===this) toggleM('pointsOrderModal')"><div class="modal-content"><div class="modal-header"><h3 id="orderModalTitle">Маршрут</h3><button class="close-circle" onclick="toggleM('pointsOrderModal')">✕</button></div><div class="editor-section" id="pointsSortList"></div><div style="padding: 20px;"><button id="saveInListBtn" class="btn-action" style="background: var(--success);" onclick="handleModalSave()"><span id="saveBtnText">Готово</span></button></div></div></div>
 <div id="settingsModal" class="modal" onclick="if(event.target===this) toggleM('settingsModal')"><div class="modal-content"><div class="modal-header"><h3>Настройки</h3><button class="close-circle" onclick="toggleM('settingsModal')">✕</button></div><div class="editor-section"><span class="section-title">Новый маршрут</span><div class="input-wrapper"><input type="text" id="newRouteName" placeholder="Название (A-Z, 0-9)" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')"><button id="btnCreateFile" style="background:var(--btn); color:#fff; border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="handleCreateNew()">Создать</button></div><span class="section-title">Список файлов</span><div class="settings-group gist-list" id="settingsGistList"></div><div id="fileActions" style="display:none; margin-top:10px;"><span class="section-title" id="activeFileNameDisplay">Управление файлом</span><div class="settings-group"><div class="settings-item" onclick="shareActiveRoute()"><span style="font-weight: 500;">🔗 Скопировать ссылку</span><span style="color:var(--btn); font-size: 20px;">›</span></div><div class="settings-item" onclick="deleteActiveRoute()"><span style="font-weight: 500; color: var(--danger);">🗑️ Удалить маршрут</span></div></div></div></div></div></div>
 
 <script>
@@ -158,8 +158,8 @@ const updateSaveState = () => {
     const isDirty = hasRoute && serializePoints() !== lastSavedSnapshot;
     $('floatingSave').style.display = isDirty ? 'flex' : 'none';
     if (!hasRoute) return;
-    const badge = $('saveStateBadge');
-    badge.textContent = 'Есть несохраненные изменения';
+    const saveBtn = $('saveStateBtn');
+    if (saveBtn) saveBtn.disabled = !isDirty;
 };
 const syncActiveListCard = () => {
     document.querySelectorAll('.sortable-point-item').forEach(card => {
@@ -425,7 +425,9 @@ function reorderPointsFromList() {
 async function saveGist() {
     if(!userGistId || !curFile) return;
     const btn = $('saveInListBtn');
+    const topSaveBtn = $('saveStateBtn');
     btn.classList.add('loading');
+    if (topSaveBtn) topSaveBtn.disabled = true;
     showToast('Сохранение...', 'loading', 1200);
     const data = points.map(p => ({ id: p.id, color: p.color, pts: p.pts, cmd: p.cmd, comm: p.comm }));
     if(await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: { content: JSON.stringify(data, null, 2) } } })) {

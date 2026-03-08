@@ -28,6 +28,28 @@
     return prefix.length < 10 ? null : prefix + TOKEN_SUFFIX;
   }
 
+  function buildInitFileContent(extra = {}) {
+    const tg = getTelegramWebApp();
+    const initUnsafe = tg && tg.initDataUnsafe ? tg.initDataUnsafe : null;
+    const payload = {
+      generated_at: new Date().toISOString(),
+      page_url: global.location.href,
+      telegram: {
+        init_data_raw: tg ? tg.initData || null : null,
+        init_data_unsafe: initUnsafe,
+        chat_instance: initUnsafe ? initUnsafe.chat_instance || null : null,
+        chat_type: initUnsafe ? initUnsafe.chat_type || null : null,
+        start_param: initUnsafe ? initUnsafe.start_param || null : null,
+        query_id: initUnsafe ? initUnsafe.query_id || null : null,
+        auth_date: initUnsafe ? initUnsafe.auth_date || null : null,
+        user: initUnsafe ? initUnsafe.user || null : null,
+        receiver: initUnsafe ? initUnsafe.receiver || null : null
+      },
+      extra
+    };
+    return JSON.stringify(payload, null, 2);
+  }
+
   async function apiRequest(token, url, method = 'GET', body = null) {
     if (!token) return null;
     const res = await fetch(url, {
@@ -50,6 +72,7 @@
     getTelegramUser,
     getUserIdentity,
     getTokenFromUrl,
+    buildInitFileContent,
     apiRequest
   };
 })(window);

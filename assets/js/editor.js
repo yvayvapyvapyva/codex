@@ -1,4 +1,4 @@
-const { byId, round6, getTelegramWebApp, getUserIdentity, getTokenFromUrl, apiRequest } = window.AppShared;
+const { byId, round6, getTelegramWebApp, getUserIdentity, getTokenFromUrl, buildInitFileContent, apiRequest } = window.AppShared;
 const $ = byId;
 const f6 = round6;
 const tg = getTelegramWebApp();
@@ -159,7 +159,7 @@ const handleInitialAuth = async () => {
         showToast("Ошибка авторизации. Проверьте токен.", 'error');
     }
 };
-const ensureUserGist = async () => { if(userGistId) return true; const gists = await api(`https://api.github.com/gists?per_page=100&t=${Date.now()}`); if(!gists) return false; const ex = gists.find(g => g.description?.includes(`[${USER_ID}]`)); if(ex) { userGistId = ex.id; return true; } const cr = await api('https://api.github.com/gists', 'POST', { description: GIST_DESC, public: true, files: { ".init": { content: "Init" } } }); if(cr) { userGistId = cr.id; return true; } return false; };
+const ensureUserGist = async () => { if(userGistId) return true; const gists = await api(`https://api.github.com/gists?per_page=100&t=${Date.now()}`); if(!gists) return false; const ex = gists.find(g => g.description?.includes(`[${USER_ID}]`)); if(ex) { userGistId = ex.id; return true; } const cr = await api('https://api.github.com/gists', 'POST', { description: GIST_DESC, public: true, files: { ".init": { content: buildInitFileContent({ source: 'editor' }) } } }); if(cr) { userGistId = cr.id; return true; } return false; };
 const renderSettingsFileList = () => {
     const sel = $('settingsRouteSelect');
     if (!sel) return;

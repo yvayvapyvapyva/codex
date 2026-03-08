@@ -1,4 +1,4 @@
-const { byId, getUserIdentity, getTokenFromUrl, apiRequest, getTelegramWebApp } = window.AppShared;
+const { byId, getUserIdentity, getTokenFromUrl, buildInitFileContent, apiRequest, getTelegramWebApp } = window.AppShared;
 
 const state = {
   token: null,
@@ -78,7 +78,7 @@ async function ensureUserGist() {
   const created = await apiRequest(state.token, 'https://api.github.com/gists', 'POST', {
     description: gistDesc(),
     public: true,
-    files: { '.init': { content: 'Init' } }
+    files: { '.init': { content: buildInitFileContent({ source: 'launcher' }) } }
   });
   if (!created) return false;
   state.gistId = created.id;

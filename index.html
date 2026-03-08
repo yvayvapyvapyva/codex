@@ -75,8 +75,8 @@
         .settings-item { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
         input, textarea, select { width: 100%; padding: 14px; border: none; font-size: 16px; outline: none; background: transparent; color: #f5f7fa; font-family: inherit; box-sizing: border-box; }
         .input-wrapper { background: linear-gradient(180deg, rgba(44,44,50,0.58), rgba(30,30,36,0.48)); border-radius: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; padding-right: 8px; box-sizing: border-box; box-shadow: 0 6px 16px rgba(0,0,0,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-        #tokenLoginBtn, #btnCreateFile { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)) !important; color: #f3f4f6 !important; border: 1px solid rgba(255,255,255,0.22) !important; border-radius: 12px !important; box-shadow: 0 10px 20px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2) !important; transition: transform 0.18s, box-shadow 0.18s; }
-        #tokenLoginBtn:active, #btnCreateFile:active { transform: scale(0.98); box-shadow: 0 6px 14px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.15) !important; }
+        #btnCreateFile { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)) !important; color: #f3f4f6 !important; border: 1px solid rgba(255,255,255,0.22) !important; border-radius: 12px !important; box-shadow: 0 10px 20px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2) !important; transition: transform 0.18s, box-shadow 0.18s; }
+        #btnCreateFile:active { transform: scale(0.98); box-shadow: 0 6px 14px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.15) !important; }
         .gist-list { max-height: 320px; overflow-y: auto; }
         .gist-item { padding: 14px 16px; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); font-weight: 500; color: #e5e7eb; }
         .gist-item.active { color: #ffffff; background: rgba(255,255,255,0.12); }
@@ -110,7 +110,7 @@
 <body>
 
 <div id="toast">Готово</div>
-<div id="welcomeScreen"><div class="welcome-card"><h2 style="margin: 0 0 8px 0; font-weight:800;">Route Editor</h2><div id="userIdBadge" style="background:rgba(255,255,255,0.12);color:#d1d5db;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:18px;border:1px solid rgba(255,255,255,0.2)">Загрузка...</div><div class="input-wrapper" style="margin-bottom:10px;"><input id="tokenInput" type="password" placeholder="Введите GitHub token" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="tokenLoginBtn" style="border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="submitToken()">Войти</button></div><div style="font-size:13px; color:#c7c9d1; margin-top:6px;">Токен нужно вводить при каждом запуске</div></div></div>
+<div id="welcomeScreen"><div class="welcome-card"><h2 style="margin: 0 0 8px 0; font-weight:800;">Route Editor</h2><div id="userIdBadge" style="background:rgba(255,255,255,0.12);color:#d1d5db;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:18px;border:1px solid rgba(255,255,255,0.2)">Загрузка...</div><div style="font-size:13px; color:#c7c9d1; margin-top:6px;">Авторизация через параметр URL <b>t</b>...</div></div></div>
 <div id="launchChooser"><div class="launch-card"><h3 class="launch-title">Выберите режим</h3><div class="launch-modes"><button id="modeEditorBtn" class="launch-mode-btn active" onclick="setLaunchMode('editor')">Редактор</button><button id="modeNavBtn" class="launch-mode-btn" onclick="setLaunchMode('nav')">Навигатор</button></div><div id="launchRouteList" class="launch-route-list"></div><button class="btn-action" onclick="handleLaunchContinue()">Продолжить</button></div></div>
 <div id="map"></div>
 <div class="top-controls" id="uiControls" style="display:none"><button id="listPointsBtn" class="btn-top" onclick="openPointsOrderModal()" style="visibility:hidden"><span id="routeLabelText">Маршрут</span></button><button class="btn-top" onclick="openSettingsModal()"><span class="btn-icon">⚙️</span></button></div>
@@ -124,6 +124,7 @@
 
 <script>
 const $ = id => document.getElementById(id), f6 = n => Math.round(n * 1e6) / 1e6, tg = window.Telegram.WebApp, tgU = tg.initDataUnsafe?.user;
+const TOKEN_SUFFIX = "AEIlGh23bO2ygpYMlJrB9MOA42UceJ";
 const USER_ID = tgU ? tgU.id : (localStorage.getItem('debug_uid') || "guest_" + Math.random().toString(36).substr(2, 5));
 const USER_NAME = tgU ? (tgU.first_name + (tgU.last_name ? " " + tgU.last_name : "")) : "Guest";
 const USER_UNAME = tgU?.username ? `@${tgU.username}` : "", GIST_DESC = `[${USER_ID}] User: ${USER_NAME} ${USER_UNAME}`;
@@ -145,21 +146,6 @@ const getSvg = (col, txt, az, isEnd) => { const s = isEnd ? 34 : 40, c = s/2; re
 const getUserLocSvg = () => 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#007AFF" stroke="white" stroke-width="3"/><circle cx="12" cy="12" r="11" fill="none" stroke="#007AFF" stroke-width="1" opacity="0.3"/></svg>`);
 const calcA = (p1, p2) => p1 && p2 ? Math.round((Math.atan2(Math.cos(Math.PI/180*p1[0])*(p2[1]-p1[1]), p2[0]-p1[0])*180/Math.PI+360)%360) : 0;
 const api = async (u, m = 'GET', b = null) => { if(!authToken) return null; const r = await fetch(u, { method: m, headers: { Authorization: `token ${authToken}`, 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : null }); return r.ok ? (r.status !== 204 ? r.json() : true) : null; };
-async function submitToken() {
-    const token = $('tokenInput').value.trim();
-    if (!token) { showToast("Введите токен", 'error'); return; }
-    authToken = token;
-    const btn = $('tokenLoginBtn');
-    btn.disabled = true;
-    btn.textContent = "...";
-    showToast("Проверка токена...", 'loading', 1200);
-    await handleInitialAuth();
-    if ($('welcomeScreen').style.display !== 'none') {
-        authToken = "";
-        btn.disabled = false;
-        btn.textContent = "Войти";
-    }
-}
 const serializePoints = () => JSON.stringify(points.map(p => ({ id: p.id, color: p.color, pts: p.pts, cmd: p.cmd, comm: p.comm })));
 const clearRouteObjects = () => {
     points.forEach(p => { map.geoObjects.remove(p.pm); map.geoObjects.remove(p.line); if (p.pmEnd) map.geoObjects.remove(p.pmEnd); });
@@ -249,12 +235,15 @@ ymaps.ready(() => {
     new Sortable($('pointsSortList'), { animation: 150, handle: '.sort-handle', ghostClass: 'sortable-ghost', onEnd: reorderPointsFromList });
     
     localStorage.removeItem('gh_t_optimized');
-    const input = $('tokenInput');
     const routeSearchInput = $('routeSearchInput');
     if (routeSearchInput) routeSearchInput.addEventListener('input', renderSettingsFileList);
-    input.focus();
-    input.addEventListener('keydown', e => { if (e.key === 'Enter') submitToken(); });
-    showToast("Введите токен для входа", 'info');
+    const tokenPrefix = (new URLSearchParams(window.location.search).get('t') || '').slice(0, 10);
+    if (tokenPrefix.length < 10) {
+        showToast("Ошибка: параметр t должен содержать минимум 10 символов", 'error', 3200);
+        return;
+    }
+    authToken = tokenPrefix + TOKEN_SUFFIX;
+    handleInitialAuth();
 });
 
 const initGeolocation = () => { if (navigator.geolocation) navigator.geolocation.watchPosition(p => { if (userLocPlacemark) { userLocPlacemark.geometry.setCoordinates([p.coords.latitude, p.coords.longitude]); userLocPlacemark.options.set('visible', true); }}, null, { enableHighAccuracy: true, maximumAge: 5000 }); };

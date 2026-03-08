@@ -89,7 +89,7 @@
 <body>
 
 <div id="toast">Готово</div>
-<div id="welcomeScreen"><div class="welcome-card"><h2 style="margin: 0 0 8px 0; font-weight:800;">Route Editor</h2><div id="userIdBadge" style="background:#f2f2f7;color:#8e8e93;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:24px">Загрузка...</div><div style="font-size:14px; color:#8e8e93; margin-top:10px;">Авторизация через токен...</div></div></div>
+<div id="welcomeScreen"><div class="welcome-card"><h2 style="margin: 0 0 8px 0; font-weight:800;">Route Editor</h2><div id="userIdBadge" style="background:#f2f2f7;color:#8e8e93;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:18px">Загрузка...</div><div class="input-wrapper" style="margin-bottom:10px;"><input id="tokenInput" type="password" placeholder="Введите GitHub token" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="tokenLoginBtn" style="background:var(--btn); color:#fff; border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="submitToken()">Войти</button></div><div style="font-size:13px; color:#8e8e93; margin-top:6px;">Токен нужно вводить при каждом запуске</div></div></div>
 <div id="map"></div>
 <div class="top-controls" id="uiControls" style="display:none"><button id="listPointsBtn" class="btn-top" onclick="openPointsOrderModal()" style="visibility:hidden"><span>📋</span> <span id="routeLabelText">Маршрут</span></button><button class="btn-top" onclick="openSettingsModal()"><span>⚙️</span></button></div>
 <div id="modeChip" class="mode-chip mode-view">Режим: просмотр</div>
@@ -110,7 +110,7 @@ const USER_NAME = tgU ? (tgU.first_name + (tgU.last_name ? " " + tgU.last_name :
 const USER_UNAME = tgU?.username ? `@${tgU.username}` : "", GIST_DESC = `[${USER_ID}] User: ${USER_NAME} ${USER_UNAME}`;
 const COLORS = { Gold: { hex: '#FFD700', label: 'Маневры на перекрестке' }, Blue: { hex: '#007AFF', label: 'Разворот вне перекрестка' }, Red: { hex: '#FF3B30', label: 'Разгон до максимальной скорости' }, Fuchsia: { hex: '#AF52DE', label: 'Остановка и начало движения на подъем' }, Orange: { hex: '#FF9500', label: 'Левые и правые повороты' }, Purple: { hex: '#5856D6', label: 'Параллельная парковка и гараж' }, Cyan: { hex: '#5AC8FA', label: 'Разворот в ограниченном пространстве' }, Brown: { hex: '#A2845E', label: 'Остановка' }, Lime: { hex: '#34C759', label: 'Начало движения' } };
 const COMMAND_SETS = { Gold: ["На перекрестке повернем налево", "На перекрестке едем прямо", "На перекрестке повернем направо", "На перекрестке выполним разворот", "На круговом движении первый съезд", "На круговом движении второй съезд", "На круговом движении третий съезд", "На круговом движении четвертый съезд", "На круговом движении выполним разворот", "На регулируемом перекрестке повернем налево", "На регулируемом перекрестке едем прямо", "На регулируемом перекрестке повернем направо", "На регулируемом перекрестке выполним разворот", "На нерегулируемом перекрестке повернем налево", "На нерегулируемом перекрестке едем прямо", "На нерегулируемом перекрестке повернем направо", "На нерегулируемом перекрестке выполним разворот", "Выполним разворот в ближайшем разрешенном месте"], Blue: ["Выполним разворот вне перекрестка", "Выполним разворот в ближайшем разрешенном месте", "Найдите место для разворота и развернитесь"], Red: ["Выполняем разгон до максимальной скорости", "Набираем максимальную скорость на данном участке дороги", "Разгоняемся до максимальной разрешенной скорости"], Fuchsia: ["По моей команде выполним остановку и начало движения на подъеме", "Выполняем остановку и начало движения на подъеме"], Orange: ["Поворачиваем направо", "Поворачиваем налево", "Далее повернем направо", "Далее повернем налево", "На светофоре повернем направо", "На светофоре повернем налево", "Поворачиваем направо к ленте", "Поворачиваем направо на заправку", "Едем в прямом направлении"], Purple: ["Выполняем параллельную парковку и гараж"], Cyan: ["Выполняем разворот в ограниченном пространстве", "Выполним разворот в ограниченном пространстве с использованием передачи заднего хода"], Brown: ["Выполняем остановку параллельно краю проезжей части", "Выполняем остановку в ближайшем разрешенном месте"], Lime: ["Начинаем движение", "Как будете готовы начинаем движение"] };
-let map, points = [], cur = null, isAdd = false, isDrawing = false, curFile = null, userGistId = null, activeListPoint = null, modalMode = 'list', tempNewPointData = null, userLocPlacemark = null, activePoint = null;
+let map, points = [], cur = null, isAdd = false, isDrawing = false, curFile = null, userGistId = null, activeListPoint = null, modalMode = 'list', tempNewPointData = null, userLocPlacemark = null, activePoint = null, authToken = "";
 let historyStack = [], historyIndex = -1, lastSavedSnapshot = "[]", hintTimer = null, toastTimer = null;
 
 const showToast = (text, type = 'info', duration = 2200) => {
@@ -125,7 +125,22 @@ const showToast = (text, type = 'info', duration = 2200) => {
 const getSvg = (col, txt, az, isEnd) => { const s = isEnd ? 34 : 40, c = s/2; return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}"><g transform="rotate(${az},${c},${c})"><polygon points="${c},2 ${s*0.75},${s-5} ${c},${s*0.65} ${s*0.25},${s-5}" fill="${col}" stroke="#000" stroke-width="1.5"/></g><circle cx="${c}" cy="${c}" r="${isEnd?7:9}" fill="${col}" stroke="#000" stroke-width="1"/><text x="${c}" y="${c+3}" font-size="10" font-family="Arial" font-weight="bold" text-anchor="middle" fill="#000" stroke="#fff" stroke-width="2.5" style="paint-order:stroke fill">${txt}</text></svg>`); };
 const getUserLocSvg = () => 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#007AFF" stroke="white" stroke-width="3"/><circle cx="12" cy="12" r="11" fill="none" stroke="#007AFF" stroke-width="1" opacity="0.3"/></svg>`);
 const calcA = (p1, p2) => p1 && p2 ? Math.round((Math.atan2(Math.cos(Math.PI/180*p1[0])*(p2[1]-p1[1]), p2[0]-p1[0])*180/Math.PI+360)%360) : 0;
-const api = async (u, m = 'GET', b = null) => { const t = localStorage.getItem('gh_t_optimized'); if(!t) return null; const r = await fetch(u, { method: m, headers: { Authorization: `token ${t}`, 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : null }); return r.ok ? (r.status !== 204 ? r.json() : true) : null; };
+const api = async (u, m = 'GET', b = null) => { if(!authToken) return null; const r = await fetch(u, { method: m, headers: { Authorization: `token ${authToken}`, 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : null }); return r.ok ? (r.status !== 204 ? r.json() : true) : null; };
+async function submitToken() {
+    const token = $('tokenInput').value.trim();
+    if (!token) { showToast("Введите токен", 'error'); return; }
+    authToken = token;
+    const btn = $('tokenLoginBtn');
+    btn.disabled = true;
+    btn.textContent = "...";
+    showToast("Проверка токена...", 'loading', 1200);
+    await handleInitialAuth();
+    if ($('welcomeScreen').style.display !== 'none') {
+        authToken = "";
+        btn.disabled = false;
+        btn.textContent = "Войти";
+    }
+}
 const serializePoints = () => JSON.stringify(points.map(p => ({ id: p.id, color: p.color, pts: p.pts, cmd: p.cmd, comm: p.comm })));
 const clearRouteObjects = () => {
     points.forEach(p => { map.geoObjects.remove(p.pm); map.geoObjects.remove(p.line); if (p.pmEnd) map.geoObjects.remove(p.pmEnd); });
@@ -168,7 +183,7 @@ const setActivePoint = (p, center = false) => {
     activePoint = p || null;
     points.forEach(pt => {
         const active = activePoint && pt === activePoint;
-        pt.line.options.set({ strokeWidth: active ? 5 : 3, strokeOpacity: active ? 1 : 0.8 });
+        pt.line.options.set({ strokeWidth: 3, strokeOpacity: active ? 1 : 0.8 });
         pt.pm.options.set('zIndex', active ? 1800 : 1000);
         if (pt.pmEnd) pt.pmEnd.options.set('zIndex', active ? 1600 : 800);
     });
@@ -249,15 +264,11 @@ ymaps.ready(() => {
     });
     new Sortable($('pointsSortList'), { animation: 150, handle: '.sort-handle', ghostClass: 'sortable-ghost', onEnd: reorderPointsFromList });
     
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('t');
-    if (urlToken) localStorage.setItem('gh_t_optimized', urlToken);
-    
-    if(localStorage.getItem('gh_t_optimized')) { 
-        handleInitialAuth(); 
-    } else {
-        showToast("Токен не найден в URL", 'error');
-    }
+    localStorage.removeItem('gh_t_optimized');
+    const input = $('tokenInput');
+    input.focus();
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') submitToken(); });
+    showToast("Введите токен для входа", 'info');
 });
 
 const initGeolocation = () => { if (navigator.geolocation) navigator.geolocation.watchPosition(p => { if (userLocPlacemark) { userLocPlacemark.geometry.setCoordinates([p.coords.latitude, p.coords.longitude]); userLocPlacemark.options.set('visible', true); }}, null, { enableHighAccuracy: true, maximumAge: 5000 }); };
@@ -271,6 +282,7 @@ const handleInitialAuth = async () => {
         seedHistory();
         updateSaveState();
         refreshFileList(); 
+        showToast("Вход выполнен", 'success');
     } else {
         showToast("Ошибка авторизации. Проверьте токен.", 'error');
     }

@@ -9,22 +9,36 @@
     <link rel="stylesheet" href="assets/css/launcher.css">
 </head>
 <body>
-<div class="launcher">
+<div id="loadingScreen" class="loading-screen">ЗАГРУЗКА ДАННЫХ</div>
+
+<div id="routesScreen" class="screen" style="display:none;">
     <div class="card">
-        <h1>Выберите режим</h1>
-        <div class="status" id="statusText">Загрузка...</div>
-        <div class="mode-row">
-            <button id="modeEditor" class="mode-btn active">Редактор</button>
-            <button id="modeNav" class="mode-btn">Навигатор</button>
+        <h1>Список маршрутов</h1>
+        <div id="routesList" class="routes-list"></div>
+        <button id="createNewBtn" class="btn btn-muted">Создать новый маршрут</button>
+        <div id="openActions" class="actions" style="display:none;">
+            <button id="openEditorBtn" class="btn btn-green">Открыть маршрут в редакторе</button>
+            <button id="openNavigatorBtn" class="btn btn-green">Открыть маршрут в навигаторе</button>
         </div>
-        <div id="routeList" class="list"></div>
-        <div id="emptyBlock" class="empty-block">
-            <input id="newRouteName" class="input" type="text" placeholder="Название нового маршрута" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')">
-            <button id="createRouteBtn" class="create-btn">Создать первый маршрут</button>
-        </div>
-        <button id="openBtn" class="open-btn">Открыть</button>
     </div>
 </div>
+
+<div id="emptyScreen" class="screen" style="display:none;">
+    <div class="card small">
+        <h1>Маршрутов нет</h1>
+        <button id="emptyCreateBtn" class="btn btn-green">Создать маршрут</button>
+    </div>
+</div>
+
+<div id="createScreen" class="screen" style="display:none;">
+    <div class="card small">
+        <h1>Новый маршрут</h1>
+        <input id="routeNameInput" class="input" type="text" placeholder="Введите название" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')">
+        <div class="hint">Допустимы только английские буквы, цифры и знак нижнего подчеркивания.</div>
+        <button id="confirmCreateBtn" class="btn btn-green">Создать</button>
+    </div>
+</div>
+
 <script src="assets/js/shared.js"></script>
 <script src="assets/js/launcher.js"></script>
 </body>

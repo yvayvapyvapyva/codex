@@ -1,7 +1,6 @@
-const { byId, getUserIdentity, getTokenFromUrl, apiRequest } = window.AppShared;
+const { byId, getUserIdentity, getTokenFromUrl, apiRequest, getTelegramWebApp } = window.AppShared;
 
 const state = {
-  mode: 'editor',
   token: null,
   user: getUserIdentity(),
   gistId: null,
@@ -10,24 +9,19 @@ const state = {
 };
 
 const ui = {
-  status: byId('statusText'),
-  list: byId('routeList'),
-  empty: byId('emptyBlock'),
-  openBtn: byId('openBtn'),
-  modeEditor: byId('modeEditor'),
-  modeNav: byId('modeNav'),
-  newName: byId('newRouteName')
+  loading: byId('loadingScreen'),
+  routesScreen: byId('routesScreen'),
+  emptyScreen: byId('emptyScreen'),
+  createScreen: byId('createScreen'),
+  routesList: byId('routesList'),
+  createNewBtn: byId('createNewBtn'),
+  emptyCreateBtn: byId('emptyCreateBtn'),
+  openActions: byId('openActions'),
+  openEditorBtn: byId('openEditorBtn'),
+  openNavigatorBtn: byId('openNavigatorBtn'),
+  routeNameInput: byId('routeNameInput'),
+  confirmCreateBtn: byId('confirmCreateBtn')
 };
-
-function setStatus(text) {
-  ui.status.textContent = text;
-}
-
-function setMode(mode) {
-  state.mode = mode;
-  ui.modeEditor.classList.toggle('active', mode === 'editor');
-  ui.modeNav.classList.toggle('active', mode === 'nav');
-}
 
 function getTokenParam() {
   return new URLSearchParams(window.location.search).get('t') || '';
@@ -36,6 +30,33 @@ function getTokenParam() {
 function gistDesc() {
   const uname = state.user.username || '';
   return `[${state.user.id}] User: ${state.user.name} ${uname}`.trim();
+}
+
+function hideAllScreens() {
+  ui.routesScreen.style.display = 'none';
+  ui.emptyScreen.style.display = 'none';
+  ui.createScreen.style.display = 'none';
+}
+
+function showRoutesScreen() {
+  hideAllScreens();
+  ui.routesScreen.style.display = 'flex';
+}
+
+function showEmptyScreen() {
+  hideAllScreens();
+  ui.emptyScreen.style.display = 'flex';
+}
+
+function showCreateScreen() {
+  hideAllScreens();
+  ui.createScreen.style.display = 'flex';
+  ui.routeNameInput.value = '';
+  ui.routeNameInput.focus();
+}
+
+function hideLoading() {
+  ui.loading.style.display = 'none';
 }
 
 async function ensureUserGist() {
@@ -66,15 +87,15 @@ async function fetchRoutes() {
 }
 
 function renderRoutes() {
-  ui.list.innerHTML = '';
+  ui.routesList.innerHTML = '';
+  state.selected = null;
+  ui.openActions.style.display = 'none';
+
   if (!state.routes.length) {
-    ui.list.innerHTML = '<div style="padding:14px;color:#c7c9d1;text-align:center;">Маршрутов пока нет</div>';
-    ui.empty.style.display = 'grid';
-    state.selected = null;
+    ui.routesList.innerHTML = '<div class="empty">Маршрутов пока нет</div>';
     return;
   }
-  ui.empty.style.display = 'none';
-  if (!state.selected) state.selected = state.routes[0];
+
   state.routes.forEach((file) => {
     const name = file.replace('.json', '');
     const btn = document.createElement('button');
@@ -82,47 +103,53 @@ function renderRoutes() {
     btn.textContent = name;
     btn.onclick = () => {
       state.selected = file;
-      renderRoutes();
+      document.querySelectorAll('.route-item').forEach((node) => node.classList.remove('active'));
+      btn.classList.add('active');
+      ui.openActions.style.display = 'block';
     };
-    ui.list.appendChild(btn);
+    ui.routesList.appendChild(btn);
   });
 }
 
-async function createFirstRoute() {
-  const name = (ui.newName.value || '').trim().replace(/[^a-zA-Z0-9_]/g, '');
+async function createRoute() {
+  const name = (ui.routeNameInput.value || '').trim().replace(/[^a-zA-Z0-9_]/g, '');
   if (!name) return;
   const fileName = `${name}.json`;
+
+  const exists = state.routes.includes(fileName);
+  if (exists) {
+    ui.routeNameInput.focus();
+    return;
+  }
+
   const ok = await apiRequest(state.token, `https://api.github.com/gists/${state.gistId}`, 'PATCH', {
     files: { [fileName]: { content: '[]' } }
   });
-  if (!ok) {
-    setStatus('Ошибка создания маршрута');
-    return;
-  }
-  ui.newName.value = '';
+  if (!ok) return;
+
   state.routes = await fetchRoutes();
-  state.selected = fileName;
   renderRoutes();
-  setStatus('Маршрут создан');
+  hideLoading();
+  showRoutesScreen();
 }
 
-function openSelected() {
-  if (!state.selected) {
-    setStatus('Сначала создайте маршрут');
-    return;
-  }
+function openEditor() {
+  if (!state.selected) return;
   const routeName = state.selected.replace('.json', '');
   const tokenParam = getTokenParam();
-  if (state.mode === 'editor') {
-    window.location.href = `editor.html?route=${encodeURIComponent(routeName)}&t=${encodeURIComponent(tokenParam)}`;
-    return;
-  }
+  window.location.href = `editor.html?route=${encodeURIComponent(routeName)}&t=${encodeURIComponent(tokenParam)}`;
+}
+
+function openNavigator() {
+  if (!state.selected) return;
+  const routeName = state.selected.replace('.json', '');
+  const tokenParam = getTokenParam();
   const navRoute = `${state.user.id}-${routeName}`;
   window.location.href = `nav.html?route=${encodeURIComponent(navRoute)}&t=${encodeURIComponent(tokenParam)}`;
 }
 
 async function init() {
-  const tg = window.AppShared.getTelegramWebApp();
+  const tg = getTelegramWebApp();
   if (tg) {
     tg.expand();
     tg.ready();
@@ -130,28 +157,34 @@ async function init() {
       try { tg.requestFullscreen(); } catch (e) {}
     }
   }
-  setMode('editor');
+
   state.token = getTokenFromUrl();
   if (!state.token) {
-    setStatus('Ошибка: параметр t должен содержать минимум 10 символов');
-    ui.openBtn.disabled = true;
+    ui.loading.textContent = 'ОШИБКА: НЕТ ПАРАМЕТРА t';
     return;
   }
-  setStatus('Подключение к GitHub...');
-  const ok = await ensureUserGist();
-  if (!ok) {
-    setStatus('Ошибка авторизации GitHub');
-    ui.openBtn.disabled = true;
+
+  const gistOk = await ensureUserGist();
+  if (!gistOk) {
+    ui.loading.textContent = 'ОШИБКА ПОДКЛЮЧЕНИЯ К GITHUB';
     return;
   }
+
   state.routes = await fetchRoutes();
-  renderRoutes();
-  setStatus(`ID: ${state.user.id}`);
+  hideLoading();
+
+  if (state.routes.length) {
+    renderRoutes();
+    showRoutesScreen();
+  } else {
+    showEmptyScreen();
+  }
 }
 
-ui.modeEditor.onclick = () => setMode('editor');
-ui.modeNav.onclick = () => setMode('nav');
-ui.openBtn.onclick = openSelected;
-byId('createRouteBtn').onclick = createFirstRoute;
+ui.createNewBtn.onclick = showCreateScreen;
+ui.emptyCreateBtn.onclick = showCreateScreen;
+ui.confirmCreateBtn.onclick = createRoute;
+ui.openEditorBtn.onclick = openEditor;
+ui.openNavigatorBtn.onclick = openNavigator;
 
 init();

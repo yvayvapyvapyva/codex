@@ -77,4 +77,4 @@
         .loading-overlay.hidden { opacity: 0; pointer-events: none; }
         #errorMsg { color: #FF3B30; display: none; margin-top: 10px; font-size: 14px; }
         #v { position: fixed; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; }
-        .nav-back-btn { top: calc(env(safe-area-inset-top, 0px) + 66px); left: 15px; z-index: 9012; }
+        .nav-back-btn { top: 50%; left: 12px; transform: translateY(-50%); z-index: 9012; }

@@ -114,8 +114,8 @@ ymaps.ready(() => {
     new Sortable($('pointsSortList'), { animation: 150, handle: '.sort-handle', ghostClass: 'sortable-ghost', onEnd: reorderPointsFromList });
     
     localStorage.removeItem('gh_t_optimized');
-    const routeSearchInput = $('routeSearchInput');
-    if (routeSearchInput) routeSearchInput.addEventListener('input', renderSettingsFileList);
+    const settingsRouteSelect = $('settingsRouteSelect');
+    if (settingsRouteSelect) settingsRouteSelect.addEventListener('change', onSettingsRouteSelect);
     const resolvedToken = getTokenFromUrl();
     if (!resolvedToken) {
         showToast("Ошибка: параметр t должен содержать минимум 10 символов", 'error', 3200);
@@ -161,29 +161,18 @@ const handleInitialAuth = async () => {
 };
 const ensureUserGist = async () => { if(userGistId) return true; const gists = await api(`https://api.github.com/gists?per_page=100&t=${Date.now()}`); if(!gists) return false; const ex = gists.find(g => g.description?.includes(`[${USER_ID}]`)); if(ex) { userGistId = ex.id; return true; } const cr = await api('https://api.github.com/gists', 'POST', { description: GIST_DESC, public: true, files: { ".init": { content: "Init" } } }); if(cr) { userGistId = cr.id; return true; } return false; };
 const renderSettingsFileList = () => {
-    const cont = $('settingsGistList');
-    if (!cont) return;
-    const q = $('routeSearchInput')?.value?.trim().toLowerCase() || "";
-    const files = settingsRouteFiles.filter(fn => fn.replace('.json', '').toLowerCase().includes(q));
-    if (!files.length) {
-        cont.innerHTML = `<div style="text-align:center;padding:20px;color:#c7c9d1">${settingsRouteFiles.length ? 'Ничего не найдено' : 'Нет маршрутов'}</div>`;
-        return;
-    }
-    cont.innerHTML = '';
-    files.forEach(fn => {
-        const active = curFile === fn;
-        const name = fn.replace('.json', '');
-        const row = Object.assign(document.createElement('div'), {
-            className: `gist-item route-item ${active ? 'active' : ''}`,
-            onclick: () => loadRoute(fn),
-            innerHTML: `<span>${name}</span><span class="meta">${active ? 'Текущий' : 'Открыть'}</span><span class="chevron">›</span>`
-        });
-        cont.appendChild(row);
+    const sel = $('settingsRouteSelect');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">Выберите маршрут</option>';
+    settingsRouteFiles.forEach(fn => {
+        const op = document.createElement('option');
+        op.value = fn;
+        op.textContent = fn.replace('.json', '');
+        sel.appendChild(op);
     });
+    sel.value = curFile || "";
 };
 const refreshFileList = async () => {
-    const cont = $('settingsGistList');
-    if (cont) cont.innerHTML = '<div style="padding:20px;text-align:center;color:#c7c9d1;">Обновление...</div>';
     const g = await api(`https://api.github.com/gists/${userGistId}?t=${Date.now()}`); if(!g) return;
     settingsRouteFiles = Object.keys(g.files).filter(fn => fn.endsWith('.json')).sort((a, b) => a.localeCompare(b));
     renderSettingsFileList();
@@ -249,7 +238,12 @@ const renameActiveRoute = async () => {
 const deleteActiveRoute = async () => { if(curFile && confirm(`Удалить маршрут ${curFile.replace('.json','')}?`) && await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: null } })) { clearRouteObjects(); curFile = null; seedHistory(); lastSavedSnapshot = "[]"; refreshFileList(); showToast("Маршрут удален", 'success'); } };
 const shareActiveRoute = () => { if(!curFile) return; const t = getTokenParam(); const link = `t.me/e_ia_bot/nav?startapp=${USER_ID}-${curFile.replace('.json','')}&t=${encodeURIComponent(t)}`, el = document.createElement('textarea'); el.value = link; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast("Ссылка скопирована", 'success'); };
 const launchNavigatorWithCurrentRoute = () => { if(!curFile) return; const routeName = curFile.replace('.json',''); const t = getTokenParam(); window.location.href = `nav.html?route=${encodeURIComponent(`${USER_ID}-${routeName}`)}&t=${encodeURIComponent(t)}`; };
-const openSettingsModal = () => { const si = $('routeSearchInput'); if (si) si.value = ''; refreshFileList(); toggleM('settingsModal'); };
+const openSettingsModal = () => { refreshFileList(); toggleM('settingsModal'); };
+const onSettingsRouteSelect = async (e) => {
+    const fn = e.target.value || '';
+    if (!fn || fn === curFile) return;
+    await loadRoute(fn);
+};
 const toggleM = id => { const m = $(id); m.style.display = (m.style.display === 'none' || !m.style.display) ? 'flex' : 'none'; };
 const closeD = () => { document.querySelectorAll('.color-dropdown').forEach(dr => dr.style.display = 'none'); $('dropdownOverlay').style.display = 'none'; };
 const toggleD = id => { const d = $(id), vis = d.style.display === 'flex'; closeD(); if(!vis) { d.style.display = 'flex'; $('dropdownOverlay').style.display = 'block'; } };

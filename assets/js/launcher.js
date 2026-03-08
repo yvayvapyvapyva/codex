@@ -16,7 +16,6 @@ const ui = {
   routesSelect: byId('routesSelect'),
   createNewBtn: byId('createNewBtn'),
   emptyCreateBtn: byId('emptyCreateBtn'),
-  routeTools: byId('routeTools'),
   openActions: byId('openActions'),
   openEditorBtn: byId('openEditorBtn'),
   openNavigatorBtn: byId('openNavigatorBtn'),
@@ -93,7 +92,6 @@ async function fetchRoutes() {
 function renderRoutes() {
   ui.routesSelect.innerHTML = '<option value="">Выберите маршрут</option>';
   state.selected = null;
-  ui.routeTools.style.display = 'none';
   ui.openActions.style.display = 'none';
   ui.createNewBtn.style.display = 'block';
 
@@ -157,7 +155,6 @@ async function renameRoute() {
   renderRoutes();
   state.selected = nextFile;
   ui.routesSelect.value = nextFile;
-  ui.routeTools.style.display = 'grid';
   ui.openActions.style.display = 'block';
   ui.createNewBtn.style.display = 'none';
 }
@@ -255,7 +252,6 @@ ui.deleteRouteBtn.onclick = deleteRoute;
 ui.copyLinkBtn.onclick = copyRouteLink;
 ui.routesSelect.onchange = (e) => {
   state.selected = e.target.value || null;
-  ui.routeTools.style.display = state.selected ? 'grid' : 'none';
   ui.openActions.style.display = state.selected ? 'block' : 'none';
   ui.createNewBtn.style.display = state.selected ? 'none' : 'block';
 };

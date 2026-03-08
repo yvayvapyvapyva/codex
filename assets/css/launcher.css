@@ -84,6 +84,32 @@ h1 {
   border-color: rgba(255, 127, 120, 0.5);
 }
 
+.route-tools {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 10px 0;
+}
+
+.tool-btn {
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34));
+  color: var(--glass-text);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 6px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.tool-btn-danger {
+  background: linear-gradient(180deg, rgba(255, 95, 87, 0.42), rgba(190, 47, 40, 0.36));
+  border-color: rgba(255, 127, 120, 0.5);
+}
+
 .actions {
   margin-top: 8px;
 }

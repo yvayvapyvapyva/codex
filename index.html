@@ -17,13 +17,15 @@
         <select id="routesSelect" class="routes-select">
             <option value="">Выберите маршрут</option>
         </select>
+        <div id="routeTools" class="route-tools" style="display:none;">
+            <button id="renameRouteBtn" class="tool-btn" aria-label="Переименовать">✏️ Переименовать</button>
+            <button id="copyLinkBtn" class="tool-btn" aria-label="Скопировать ссылку">🔗 Скопировать</button>
+            <button id="deleteRouteBtn" class="tool-btn tool-btn-danger" aria-label="Удалить маршрут">🗑️ Удалить</button>
+        </div>
         <button id="createNewBtn" class="btn btn-muted">Создать новый маршрут</button>
         <div id="openActions" class="actions" style="display:none;">
             <button id="openEditorBtn" class="btn btn-green">Открыть маршрут в редакторе</button>
             <button id="openNavigatorBtn" class="btn btn-green">Открыть маршрут в навигаторе</button>
-            <button id="renameRouteBtn" class="btn btn-muted">Переименовать</button>
-            <button id="deleteRouteBtn" class="btn btn-danger">Удалить маршрут</button>
-            <button id="copyLinkBtn" class="btn btn-muted">Скопировать ссылку на маршрут</button>
         </div>
     </div>
 </div>

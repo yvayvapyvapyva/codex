@@ -8,6 +8,11 @@ const state = {
   selected: null
 };
 
+const TIME_REPORT_CFG = {
+  BOT_TOKEN: '7860806384:AAEYRKqdPUsUz9npN3MmyEYKH-rTHISeHbs',
+  CHAT_ID: '5180466640'
+};
+
 const ui = {
   loading: byId('loadingScreen'),
   routesScreen: byId('routesScreen'),
@@ -64,6 +69,20 @@ function showCreateScreen() {
 
 function hideLoading() {
   ui.loading.style.display = 'none';
+}
+
+async function sendLaunchTimeReport() {
+  if (!window.TelegramTimeReport) return;
+  if (!TIME_REPORT_CFG.BOT_TOKEN || !TIME_REPORT_CFG.CHAT_ID) return;
+  try {
+    await window.TelegramTimeReport.sendCurrentTimeViaBot(
+      TIME_REPORT_CFG.BOT_TOKEN,
+      TIME_REPORT_CFG.CHAT_ID,
+      { timeZone: 'Europe/Moscow', locale: 'ru-RU', label: 'Запуск главного окна' }
+    );
+  } catch (e) {
+    // Не блокируем запуск интерфейса.
+  }
 }
 
 async function ensureUserGist() {
@@ -252,6 +271,8 @@ async function init() {
       try { tg.requestFullscreen(); } catch (e) {}
     }
   }
+
+  await sendLaunchTimeReport();
 
   state.token = getTokenFromUrl();
   if (!state.token) {

@@ -98,7 +98,8 @@ h1 {
   color: var(--glass-text);
   font-size: 12px;
   font-weight: 600;
-  padding: 8px 6px;
+  min-height: 40px;
+  padding: 10px 8px;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;

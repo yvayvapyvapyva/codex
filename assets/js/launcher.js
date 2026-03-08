@@ -30,6 +30,10 @@ function getTokenParam() {
   return new URLSearchParams(window.location.search).get('t') || '';
 }
 
+function notify(text) {
+  alert(text);
+}
+
 function gistDesc() {
   const uname = state.user.username || '';
   return `[${state.user.id}] User: ${state.user.name} ${uname}`.trim();
@@ -110,11 +114,15 @@ function renderRoutes() {
 
 async function createRoute() {
   const name = (ui.routeNameInput.value || '').trim().replace(/[^a-zA-Z0-9_]/g, '');
-  if (!name) return;
+  if (!name) {
+    notify('Введите название маршрута.');
+    return;
+  }
   const fileName = `${name}.json`;
 
   const exists = state.routes.includes(fileName);
   if (exists) {
+    notify('Маршрут с таким именем уже существует.');
     ui.routeNameInput.focus();
     return;
   }
@@ -122,12 +130,16 @@ async function createRoute() {
   const ok = await apiRequest(state.token, `https://api.github.com/gists/${state.gistId}`, 'PATCH', {
     files: { [fileName]: { content: '[]' } }
   });
-  if (!ok) return;
+  if (!ok) {
+    notify('Не удалось создать маршрут.');
+    return;
+  }
 
   state.routes = await fetchRoutes();
   renderRoutes();
   hideLoading();
   showRoutesScreen();
+  notify('Маршрут создан.');
 }
 
 async function renameRoute() {
@@ -136,12 +148,22 @@ async function renameRoute() {
   const nextRaw = prompt('Новое название маршрута', currentName);
   if (nextRaw === null) return;
   const nextName = nextRaw.trim().replace(/[^a-zA-Z0-9_]/g, '');
-  if (!nextName || nextName === currentName) return;
+  if (!nextName) {
+    notify('Некорректное имя маршрута.');
+    return;
+  }
+  if (nextName === currentName) return;
   const nextFile = `${nextName}.json`;
-  if (state.routes.includes(nextFile)) return;
+  if (state.routes.includes(nextFile)) {
+    notify('Маршрут с таким именем уже существует.');
+    return;
+  }
 
   const gist = await apiRequest(state.token, `https://api.github.com/gists/${state.gistId}?t=${Date.now()}`);
-  if (!gist || !gist.files || !gist.files[state.selected]) return;
+  if (!gist || !gist.files || !gist.files[state.selected]) {
+    notify('Не удалось загрузить данные маршрута.');
+    return;
+  }
   const content = gist.files[state.selected].content || '[]';
   const ok = await apiRequest(state.token, `https://api.github.com/gists/${state.gistId}`, 'PATCH', {
     files: {
@@ -149,7 +171,10 @@ async function renameRoute() {
       [nextFile]: { content }
     }
   });
-  if (!ok) return;
+  if (!ok) {
+    notify('Не удалось переименовать маршрут.');
+    return;
+  }
 
   state.routes = await fetchRoutes();
   renderRoutes();
@@ -157,6 +182,7 @@ async function renameRoute() {
   ui.routesSelect.value = nextFile;
   ui.openActions.style.display = 'block';
   ui.createNewBtn.style.display = 'none';
+  notify('Маршрут переименован.');
 }
 
 async function deleteRoute() {
@@ -166,15 +192,20 @@ async function deleteRoute() {
   const ok = await apiRequest(state.token, `https://api.github.com/gists/${state.gistId}`, 'PATCH', {
     files: { [state.selected]: null }
   });
-  if (!ok) return;
+  if (!ok) {
+    notify('Не удалось удалить маршрут.');
+    return;
+  }
 
   state.routes = await fetchRoutes();
   if (!state.routes.length) {
+    notify('Маршрут удалён.');
     showEmptyScreen();
     return;
   }
   renderRoutes();
   showRoutesScreen();
+  notify('Маршрут удалён.');
 }
 
 async function copyRouteLink() {
@@ -182,16 +213,24 @@ async function copyRouteLink() {
   const routeName = state.selected.replace('.json', '');
   const tokenParam = getTokenParam();
   const link = `https://t.me/e_ia_bot/nav?startapp=${state.user.id}-${routeName}&t=${encodeURIComponent(tokenParam)}`;
+  let copied = false;
   try {
     await navigator.clipboard.writeText(link);
+    copied = true;
   } catch (e) {
-    const ta = document.createElement('textarea');
-    ta.value = link;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = link;
+      document.body.appendChild(ta);
+      ta.select();
+      copied = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch (e2) {
+      copied = false;
+    }
   }
+  if (copied) notify('Ссылка скопирована в буфер обмена.');
+  else prompt('Скопируйте ссылку вручную:', link);
 }
 
 function openEditor() {

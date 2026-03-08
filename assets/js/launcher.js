@@ -13,7 +13,7 @@ const ui = {
   routesScreen: byId('routesScreen'),
   emptyScreen: byId('emptyScreen'),
   createScreen: byId('createScreen'),
-  routesList: byId('routesList'),
+  routesSelect: byId('routesSelect'),
   createNewBtn: byId('createNewBtn'),
   emptyCreateBtn: byId('emptyCreateBtn'),
   openActions: byId('openActions'),
@@ -87,27 +87,20 @@ async function fetchRoutes() {
 }
 
 function renderRoutes() {
-  ui.routesList.innerHTML = '';
+  ui.routesSelect.innerHTML = '<option value="">Выберите маршрут</option>';
   state.selected = null;
   ui.openActions.style.display = 'none';
 
   if (!state.routes.length) {
-    ui.routesList.innerHTML = '<div class="empty">Маршрутов пока нет</div>';
     return;
   }
 
   state.routes.forEach((file) => {
     const name = file.replace('.json', '');
-    const btn = document.createElement('button');
-    btn.className = `route-item ${state.selected === file ? 'active' : ''}`;
-    btn.textContent = name;
-    btn.onclick = () => {
-      state.selected = file;
-      document.querySelectorAll('.route-item').forEach((node) => node.classList.remove('active'));
-      btn.classList.add('active');
-      ui.openActions.style.display = 'block';
-    };
-    ui.routesList.appendChild(btn);
+    const option = document.createElement('option');
+    option.value = file;
+    option.textContent = name;
+    ui.routesSelect.appendChild(option);
   });
 }
 
@@ -186,5 +179,9 @@ ui.emptyCreateBtn.onclick = showCreateScreen;
 ui.confirmCreateBtn.onclick = createRoute;
 ui.openEditorBtn.onclick = openEditor;
 ui.openNavigatorBtn.onclick = openNavigator;
+ui.routesSelect.onchange = (e) => {
+  state.selected = e.target.value || null;
+  ui.openActions.style.display = state.selected ? 'block' : 'none';
+};
 
 init();

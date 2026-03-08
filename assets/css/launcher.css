@@ -46,34 +46,16 @@ h1 {
   font-size: 24px;
 }
 
-.routes-list {
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 14px;
-  background: rgba(30,30,36,0.45);
-  max-height: 300px;
-  overflow-y: auto;
-  margin-bottom: 12px;
-}
-
-.route-item {
+.routes-select {
   width: 100%;
-  text-align: left;
-  border: 0;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  padding: 12px;
-  background: transparent;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34));
   color: var(--glass-text);
+  padding: 12px;
   font-size: 16px;
-  cursor: pointer;
-}
-
-.route-item:last-child {
-  border-bottom: 0;
-}
-
-.route-item.active {
-  background: rgba(52, 199, 89, 0.3);
-  color: #b6ffd1;
+  font-weight: 600;
 }
 
 .btn {

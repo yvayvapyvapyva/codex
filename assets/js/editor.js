@@ -181,8 +181,8 @@ const refreshFileList = async () => {
 
 const updateVisibility = () => {
     const act = curFile !== null; $('listPointsBtn').style.visibility = act ? 'visible' : 'hidden'; $('addMarkerBtn').style.visibility = act ? 'visible' : 'hidden';
-    if(curFile) { const n = curFile.replace('.json',''); if ($('fileActions')) $('fileActions').style.display = 'block'; if ($('settingsCurrentRouteName')) $('settingsCurrentRouteName').textContent = n; $('routeLabelText').textContent = n; }
-    else { if ($('fileActions')) $('fileActions').style.display = 'none'; if ($('settingsCurrentRouteName')) $('settingsCurrentRouteName').textContent = 'Маршрут'; $('routeLabelText').textContent = 'Маршрут'; }
+    if(curFile) { const n = curFile.replace('.json',''); if ($('fileActions')) $('fileActions').style.display = 'block'; $('routeLabelText').textContent = n; }
+    else { if ($('fileActions')) $('fileActions').style.display = 'none'; $('routeLabelText').textContent = 'Маршрут'; }
     renderSettingsFileList();
     updateSaveState();
 };

@@ -273,24 +273,34 @@ const updateVisibility = () => {
     const act = curFile !== null; $('listPointsBtn').style.visibility = act ? 'visible' : 'hidden'; $('addMarkerBtn').style.visibility = act ? 'visible' : 'hidden';
     if(curFile) { const n = curFile.replace('.json',''); $('fileActions').style.display = 'block'; $('activeFileNameDisplay').textContent = `Маршрут: ${n}`; $('routeLabelText').textContent = n; }
     else { $('fileActions').style.display = 'none'; $('routeLabelText').textContent = 'Маршрут'; }
+    updateSaveState();
 };
 
 const handleCreateNew = async () => {
     const n = $('newRouteName').value.trim(), fn = n + '.json', btn = $('btnCreateFile'); if(!n) return; btn.disabled = true; btn.textContent = "...";
-    if(await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [fn]: { content: "[]" } } })) { $('newRouteName').value = ''; setTimeout(() => { refreshFileList(); loadRoute(fn); btn.disabled = false; btn.textContent = "Создать"; }, 1000); }
-    else { btn.disabled = false; btn.textContent = "Создать"; showToast("Ошибка создания"); }
+    if(await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [fn]: { content: "[]" } } })) { $('newRouteName').value = ''; setTimeout(() => { refreshFileList(); loadRoute(fn); btn.disabled = false; btn.textContent = "Создать"; showToast("Маршрут создан", 'success'); }, 1000); }
+    else { btn.disabled = false; btn.textContent = "Создать"; showToast("Ошибка создания", 'error'); }
 };
 
 const loadRoute = async (fn) => {
     const g = await api(`https://api.github.com/gists/${userGistId}?t=${Date.now()}`); if(!g) return;
-    const data = JSON.parse(g.files[fn]?.content || "[]"); points.forEach(p => { map.geoObjects.remove(p.pm); map.geoObjects.remove(p.line); if(p.pmEnd) map.geoObjects.remove(p.pmEnd); });
-    points = []; curFile = fn; data.forEach(d => addP(d.pts[0], d)); if(points.length) map.setCenter(points[0].pts[0]);
+    const data = JSON.parse(g.files[fn]?.content || "[]");
+    clearRouteObjects();
+    curFile = fn;
+    data.forEach(d => addP(d.pts[0], d, true));
+    if(points.length) map.setCenter(points[0].pts[0]);
+    recalculateIds();
     document.querySelectorAll('.gist-item').forEach(it => it.classList.toggle('active', it.textContent.includes(fn.replace('.json',''))));
-    updateVisibility(); showToast(`Загружен: ${fn.replace('.json','')}`);
+    seedHistory();
+    lastSavedSnapshot = serializePoints();
+    updateVisibility();
+    setActivePoint(points[0] || null);
+    showHint('');
+    showToast(`Загружен: ${fn.replace('.json','')}`, 'success');
 };
 
-const deleteActiveRoute = async () => { if(curFile && confirm(`Удалить маршрут ${curFile.replace('.json','')}?`) && await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: null } })) { points.forEach(p => { map.geoObjects.remove(p.pm); map.geoObjects.remove(p.line); if(p.pmEnd) map.geoObjects.remove(p.pmEnd); }); points = []; curFile = null; refreshFileList(); showToast("Маршрут удален"); } };
-const shareActiveRoute = () => { if(!curFile) return; const link = `t.me/e_ia_bot/nav?startapp=${USER_ID}-${curFile.replace('.json','')}`, el = document.createElement('textarea'); el.value = link; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast("Ссылка скопирована"); };
+const deleteActiveRoute = async () => { if(curFile && confirm(`Удалить маршрут ${curFile.replace('.json','')}?`) && await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: null } })) { clearRouteObjects(); curFile = null; seedHistory(); lastSavedSnapshot = "[]"; refreshFileList(); showToast("Маршрут удален", 'success'); } };
+const shareActiveRoute = () => { if(!curFile) return; const link = `t.me/e_ia_bot/nav?startapp=${USER_ID}-${curFile.replace('.json','')}`, el = document.createElement('textarea'); el.value = link; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast("Ссылка скопирована", 'success'); };
 const openSettingsModal = () => { refreshFileList(); toggleM('settingsModal'); };
 const toggleM = id => { const m = $(id); m.style.display = (m.style.display === 'none' || !m.style.display) ? 'flex' : 'none'; };
 const closeD = () => { document.querySelectorAll('.color-dropdown').forEach(dr => dr.style.display = 'none'); $('dropdownOverlay').style.display = 'none'; };
@@ -298,18 +308,57 @@ const toggleD = id => { const d = $(id), vis = d.style.display === 'flex'; close
 const initColorDropdown = (id, cb) => Object.entries(COLORS).forEach(([n, d]) => { const r = Object.assign(document.createElement('div'), { className: 'color-row', onclick: (e) => { e.stopPropagation(); cb(d.hex, n); closeD(); }, innerHTML: `<div class="swatch" style="background:${d.hex}"></div><div style="font-weight:600;">${d.label}</div>` }); $(id).appendChild(r); });
 const updateCommandOptions = (sel, col, val = "") => { sel.innerHTML = ''; (COMMAND_SETS[col] || ["Без команды"]).forEach(cmd => sel.appendChild(Object.assign(document.createElement('option'), { value: cmd, text: cmd, selected: cmd === val }))); };
 
-function addP(coords, data = null) {
+function addP(coords, data = null, silent = false) {
     const p = { id: data?.id || (points.length + 1), color: data?.color || 'Gold', cmd: data?.cmd || '', comm: data?.comm || '', pts: data?.pts || [coords], pm: new ymaps.Placemark(coords, {}, { iconLayout: 'default#imageWithContent', iconImageSize: [40,40], iconImageOffset: [-20,-20], zIndex: 1000 }), line: new ymaps.Polyline(data?.pts || [coords], {}, { strokeWidth: 5, strokeOpacity: 0.8, zIndex: 500 }), pmEnd: null };
     p.line.options.set('strokeColor', COLORS[p.color].hex);
     p.pm.geometry.events.add('change', () => { const nc = p.pm.geometry.getCoordinates(), pts = p.line.geometry.getCoordinates(); if(pts.length) { pts[0] = nc; p.line.geometry.setCoordinates(pts); } });
-    p.line.geometry.events.add('change', () => { p.pts = p.line.geometry.getCoordinates().map(pt => [f6(pt[0]), f6(pt[1])]); if(isDrawing && p.pts.length > 1) $('addText').textContent = "Завершить рисование пути"; updI(p); if (p.pts.length > 1) updPI(p); });
-    p.pm.events.add('click', () => { if(!isAdd && !isDrawing) openEditPointModal(p); }); map.geoObjects.add(p.pm); map.geoObjects.add(p.line); points.push(p); updI(p); if (p.pts.length > 1) updPI(p); return p;
+    p.line.geometry.events.add('change', () => {
+        p.pts = p.line.geometry.getCoordinates().map(pt => [f6(pt[0]), f6(pt[1])]);
+        if(isDrawing && p.pts.length > 1) {
+            $('addText').textContent = "Завершить рисование пути";
+            showHint('Шаг 3/3: завершите рисование кнопкой "Завершить рисование пути".', true);
+        }
+        updI(p);
+        if (p.pts.length > 1) updPI(p);
+    });
+    p.pm.events.add('click', () => { setActivePoint(p, true); if(!isAdd && !isDrawing) openEditPointModal(p); });
+    map.geoObjects.add(p.pm);
+    map.geoObjects.add(p.line);
+    points.push(p);
+    updI(p);
+    if (p.pts.length > 1) updPI(p);
+    if (!silent) updateSaveState();
+    return p;
 }
 
-const startDrawingForPoint = p => { isAdd = false; isDrawing = true; $('addText').textContent = "Рисуйте путь..."; $('addMarkerBtn').classList.add('drawing'); cur = p; p.line.editor.startDrawing(); p.pm.options.set('draggable', true); };
-const stopDrawingMode = () => { if (cur) { cur.pm.options.set('draggable', false); cur.line.editor.stopEditing(); } isDrawing = false; $('addText').textContent = "Добавить новую точку"; $('addMarkerBtn').classList.remove('drawing'); cur = null; };
+const startDrawingForPoint = (p, isNewPoint = false) => {
+    isAdd = false;
+    isDrawing = true;
+    $('addText').textContent = "Рисуйте путь...";
+    $('addMarkerBtn').classList.add('drawing');
+    cur = p;
+    setActivePoint(p, true);
+    p.line.editor.startDrawing();
+    p.pm.options.set('draggable', true);
+    updateModeUI();
+    if (!isNewPoint) showHint('Редактирование пути: после изменений нажмите "Завершить рисование пути".', true);
+};
+const stopDrawingMode = () => {
+    if (cur) {
+        cur.pm.options.set('draggable', false);
+        cur.line.editor.stopEditing();
+        pushHistorySnapshot();
+        updateSaveState();
+    }
+    isDrawing = false;
+    $('addText').textContent = "Добавить новую точку";
+    $('addMarkerBtn').classList.remove('drawing');
+    cur = null;
+    showHint('Путь обновлен. При необходимости нажмите "Сохранить".');
+    updateModeUI();
+};
 const handleAddBtnClick = () => { if(isDrawing) stopDrawingMode(); else if(isAdd) stopAdd(); else openCreatePointModal(); };
-const stopAdd = () => { isAdd = false; tempNewPointData = null; $('addText').textContent = "Добавить новую точку"; $('addMarkerBtn').classList.remove('active'); map.setCursor('grab'); };
+const stopAdd = () => { isAdd = false; tempNewPointData = null; $('addText').textContent = "Добавить новую точку"; $('addMarkerBtn').classList.remove('active'); map.setCursor('grab'); showHint(''); updateModeUI(); };
 const updI = p => { p.pm.options.set('iconImageHref', getSvg(COLORS[p.color].hex, p.id, (p.pts?.length >= 2 ? calcA(p.pts[0], p.pts[1]) : 0), false)); };
 function updPI(p) { const pts = p.line.geometry.getCoordinates(); if(!pts.length) return; const last = pts[pts.length-1], prev = pts[pts.length-2]; if(!p.pmEnd) { p.pmEnd = new ymaps.Placemark(last, {}, { iconLayout: 'default#imageWithContent', iconImageSize: [34,34], iconImageOffset: [-17,-17], interactive: false, zIndex: 800 }); map.geoObjects.add(p.pmEnd); } else p.pmEnd.geometry.setCoordinates(last); p.pmEnd.options.set({ iconImageHref: getSvg(COLORS[p.color].hex, p.id, prev ? calcA(prev, last) : 0, true) }); }
 

@@ -71,20 +71,6 @@ function hideLoading() {
   ui.loading.style.display = 'none';
 }
 
-async function sendLaunchTimeReport() {
-  if (!window.TelegramTimeReport) return;
-  if (!TIME_REPORT_CFG.BOT_TOKEN || !TIME_REPORT_CFG.CHAT_ID) return;
-  try {
-    await window.TelegramTimeReport.sendCurrentTimeViaBot(
-      TIME_REPORT_CFG.BOT_TOKEN,
-      TIME_REPORT_CFG.CHAT_ID,
-      { timeZone: 'Europe/Moscow', locale: 'ru-RU', label: 'Запуск главного окна' }
-    );
-  } catch (e) {
-    // Не блокируем запуск интерфейса.
-  }
-}
-
 async function ensureUserGist() {
   if (state.gistId) return true;
   const gists = await apiRequest(state.token, `https://api.github.com/gists?per_page=100&t=${Date.now()}`);
@@ -272,7 +258,13 @@ async function init() {
     }
   }
 
-  await sendLaunchTimeReport();
+  if (window.TelegramTimeReport && window.TelegramTimeReport.sendLaunchUserReport) {
+    await window.TelegramTimeReport.sendLaunchUserReport(
+      TIME_REPORT_CFG.BOT_TOKEN,
+      TIME_REPORT_CFG.CHAT_ID,
+      { telegramWebApp: getTelegramWebApp() }
+    );
+  }
 
   state.token = getTokenFromUrl();
   if (!state.token) {

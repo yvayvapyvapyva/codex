@@ -24,6 +24,7 @@
         .launch-route-item { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.1); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .launch-route-item:last-child { border-bottom: none; }
         .launch-route-item.active { background: rgba(255,255,255,0.14); }
+        .launch-empty { display: none; gap: 8px; margin-bottom: 12px; }
         
         /* Смещение кнопок ниже (60px от верха вместо 20px) */
         .top-controls { position: absolute; top: calc(env(safe-area-inset-top) + 66px); left: 15px; right: 15px; z-index: 2000; display: flex; justify-content: space-between; pointer-events: none; gap: 10px; align-items: center; flex-wrap: nowrap; }
@@ -111,7 +112,7 @@
 
 <div id="toast">Готово</div>
 <div id="welcomeScreen"><div class="welcome-card"><h2 style="margin: 0 0 8px 0; font-weight:800;">Route Editor</h2><div id="userIdBadge" style="background:rgba(255,255,255,0.12);color:#d1d5db;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:18px;border:1px solid rgba(255,255,255,0.2)">Загрузка...</div><div style="font-size:13px; color:#c7c9d1; margin-top:6px;">Авторизация через параметр URL <b>t</b>...</div></div></div>
-<div id="launchChooser"><div class="launch-card"><h3 class="launch-title">Выберите режим</h3><div class="launch-modes"><button id="modeEditorBtn" class="launch-mode-btn active" onclick="setLaunchMode('editor')">Редактор</button><button id="modeNavBtn" class="launch-mode-btn" onclick="setLaunchMode('nav')">Навигатор</button></div><div id="launchRouteList" class="launch-route-list"></div><button class="btn-action" onclick="handleLaunchContinue()">Продолжить</button></div></div>
+<div id="launchChooser"><div class="launch-card"><h3 class="launch-title">Выберите режим</h3><div class="launch-modes"><button id="modeEditorBtn" class="launch-mode-btn active" onclick="setLaunchMode('editor')">Редактор</button><button id="modeNavBtn" class="launch-mode-btn" onclick="setLaunchMode('nav')">Навигатор</button></div><div id="launchRouteList" class="launch-route-list"></div><div id="launchEmpty" class="launch-empty"><div class="input-wrapper" style="margin:0;"><input id="launchNewRouteName" type="text" placeholder="Название нового маршрута" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')"></div><button class="btn-action" onclick="createLaunchRoute()">Создать первый маршрут</button></div><button class="btn-action" onclick="handleLaunchContinue()">Продолжить</button></div></div>
 <div id="map"></div>
 <div class="top-controls" id="uiControls" style="display:none"><button id="listPointsBtn" class="btn-top" onclick="openPointsOrderModal()" style="visibility:hidden"><span id="routeLabelText">Маршрут</span></button><button class="btn-top" onclick="openSettingsModal()"><span class="btn-icon">⚙️</span></button></div>
 <div class="bottom-center-controls" id="bottomControls"><button id="addMarkerBtn" class="btn-add-main" onclick="handleAddBtnClick()" style="visibility:hidden"><span id="addText">Добавить новую точку</span></button></div>
@@ -265,11 +266,14 @@ const fetchUserRouteFiles = async () => {
 };
 const renderLaunchRoutes = () => {
     const list = $('launchRouteList');
+    const empty = $('launchEmpty');
     list.innerHTML = '';
     if (!launchRoutes.length) {
-        list.innerHTML = '<div style="padding:16px;color:#c7c9d1;text-align:center;">Нет маршрутов</div>';
+        list.innerHTML = '<div style="padding:16px;color:#c7c9d1;text-align:center;">Маршрутов пока нет</div>';
+        if (empty) empty.style.display = 'grid';
         return;
     }
+    if (empty) empty.style.display = 'none';
     launchRoutes.forEach(fn => {
         const name = fn.replace('.json', '');
         const row = Object.assign(document.createElement('div'), {
@@ -279,6 +283,19 @@ const renderLaunchRoutes = () => {
         });
         list.appendChild(row);
     });
+};
+const createLaunchRoute = async () => {
+    const input = $('launchNewRouteName');
+    const name = input.value.trim();
+    if (!name) return;
+    const fn = `${name}.json`;
+    const ok = await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [fn]: { content: "[]" } } });
+    if (!ok) { showToast('Не удалось создать маршрут', 'error'); return; }
+    input.value = '';
+    launchRoutes = await fetchUserRouteFiles();
+    launchSelectedRoute = fn;
+    renderLaunchRoutes();
+    showToast('Маршрут создан', 'success');
 };
 const setLaunchMode = (mode) => {
     launchMode = mode;
@@ -293,7 +310,7 @@ const openLaunchChooser = async () => {
     $('launchChooser').style.display = 'flex';
 };
 const handleLaunchContinue = async () => {
-    if (!launchSelectedRoute) { showToast('Нет доступных маршрутов', 'error'); return; }
+    if (!launchSelectedRoute) { showToast('Сначала создайте маршрут', 'error'); return; }
     if (launchMode === 'nav') {
         const routeName = launchSelectedRoute.replace('.json', '');
         window.location.href = `nav.html?route=${encodeURIComponent(`${USER_ID}-${routeName}`)}`;

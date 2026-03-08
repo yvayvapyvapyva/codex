@@ -133,6 +133,7 @@ const getRouteFromUrl = () => {
     return normalized;
 };
 const getTokenParam = () => new URLSearchParams(window.location.search).get('t') || '';
+const goHome = () => { const t = getTokenParam(); window.location.href = `index.html?t=${encodeURIComponent(t)}`; };
 const handleInitialAuth = async () => { 
     if(await ensureUserGist()) { 
         $('welcomeScreen').style.display = 'none'; 

@@ -28,6 +28,7 @@ if (tg) {
 
 const urlParams = new URLSearchParams(window.location.search);
 if (!startParam) startParam = urlParams.get('route') || urlParams.get('startapp');
+const goHome = () => { const t = urlParams.get('t') || ''; window.location.href = `index.html?t=${encodeURIComponent(t)}`; };
 
 const v = document.getElementById('v');
 let wl = null, map, userMarker, pointsCollection, linesCollection, pointsData=[], currentIndex=-1, previewIndex=-1, autoCenter=false, lastPos=null, lastAz=0, currentSpeed=0, iconCache = new Map();

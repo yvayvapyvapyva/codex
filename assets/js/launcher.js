@@ -19,6 +19,9 @@ const ui = {
   openActions: byId('openActions'),
   openEditorBtn: byId('openEditorBtn'),
   openNavigatorBtn: byId('openNavigatorBtn'),
+  renameRouteBtn: byId('renameRouteBtn'),
+  deleteRouteBtn: byId('deleteRouteBtn'),
+  copyLinkBtn: byId('copyLinkBtn'),
   routeNameInput: byId('routeNameInput'),
   confirmCreateBtn: byId('confirmCreateBtn')
 };
@@ -90,6 +93,7 @@ function renderRoutes() {
   ui.routesSelect.innerHTML = '<option value="">Выберите маршрут</option>';
   state.selected = null;
   ui.openActions.style.display = 'none';
+  ui.createNewBtn.style.display = 'block';
 
   if (!state.routes.length) {
     return;
@@ -124,6 +128,70 @@ async function createRoute() {
   renderRoutes();
   hideLoading();
   showRoutesScreen();
+}
+
+async function renameRoute() {
+  if (!state.selected) return;
+  const currentName = state.selected.replace('.json', '');
+  const nextRaw = prompt('Новое название маршрута', currentName);
+  if (nextRaw === null) return;
+  const nextName = nextRaw.trim().replace(/[^a-zA-Z0-9_]/g, '');
+  if (!nextName || nextName === currentName) return;
+  const nextFile = `${nextName}.json`;
+  if (state.routes.includes(nextFile)) return;
+
+  const gist = await apiRequest(state.token, `https://api.github.com/gists/${state.gistId}?t=${Date.now()}`);
+  if (!gist || !gist.files || !gist.files[state.selected]) return;
+  const content = gist.files[state.selected].content || '[]';
+  const ok = await apiRequest(state.token, `https://api.github.com/gists/${state.gistId}`, 'PATCH', {
+    files: {
+      [state.selected]: null,
+      [nextFile]: { content }
+    }
+  });
+  if (!ok) return;
+
+  state.routes = await fetchRoutes();
+  renderRoutes();
+  state.selected = nextFile;
+  ui.routesSelect.value = nextFile;
+  ui.openActions.style.display = 'block';
+  ui.createNewBtn.style.display = 'none';
+}
+
+async function deleteRoute() {
+  if (!state.selected) return;
+  const routeName = state.selected.replace('.json', '');
+  if (!confirm(`Удалить маршрут ${routeName}?`)) return;
+  const ok = await apiRequest(state.token, `https://api.github.com/gists/${state.gistId}`, 'PATCH', {
+    files: { [state.selected]: null }
+  });
+  if (!ok) return;
+
+  state.routes = await fetchRoutes();
+  if (!state.routes.length) {
+    showEmptyScreen();
+    return;
+  }
+  renderRoutes();
+  showRoutesScreen();
+}
+
+async function copyRouteLink() {
+  if (!state.selected) return;
+  const routeName = state.selected.replace('.json', '');
+  const tokenParam = getTokenParam();
+  const link = `https://t.me/e_ia_bot/nav?startapp=${state.user.id}-${routeName}&t=${encodeURIComponent(tokenParam)}`;
+  try {
+    await navigator.clipboard.writeText(link);
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = link;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
 }
 
 function openEditor() {
@@ -179,9 +247,13 @@ ui.emptyCreateBtn.onclick = showCreateScreen;
 ui.confirmCreateBtn.onclick = createRoute;
 ui.openEditorBtn.onclick = openEditor;
 ui.openNavigatorBtn.onclick = openNavigator;
+ui.renameRouteBtn.onclick = renameRoute;
+ui.deleteRouteBtn.onclick = deleteRoute;
+ui.copyLinkBtn.onclick = copyRouteLink;
 ui.routesSelect.onchange = (e) => {
   state.selected = e.target.value || null;
   ui.openActions.style.display = state.selected ? 'block' : 'none';
+  ui.createNewBtn.style.display = state.selected ? 'none' : 'block';
 };
 
 init();

@@ -97,7 +97,6 @@ function renderRoutes() {
   ui.routesSelect.innerHTML = '<option value="">Выберите маршрут</option>';
   state.selected = null;
   ui.openActions.style.display = 'none';
-  ui.createNewBtn.style.display = 'block';
 
   if (!state.routes.length) {
     return;
@@ -137,6 +136,9 @@ async function createRoute() {
 
   state.routes = await fetchRoutes();
   renderRoutes();
+  state.selected = fileName;
+  ui.routesSelect.value = fileName;
+  ui.openActions.style.display = 'block';
   hideLoading();
   showRoutesScreen();
   notify('Маршрут создан.');
@@ -181,7 +183,6 @@ async function renameRoute() {
   state.selected = nextFile;
   ui.routesSelect.value = nextFile;
   ui.openActions.style.display = 'block';
-  ui.createNewBtn.style.display = 'none';
   notify('Маршрут переименован.');
 }
 
@@ -292,7 +293,6 @@ ui.copyLinkBtn.onclick = copyRouteLink;
 ui.routesSelect.onchange = (e) => {
   state.selected = e.target.value || null;
   ui.openActions.style.display = state.selected ? 'block' : 'none';
-  ui.createNewBtn.style.display = state.selected ? 'none' : 'block';
 };
 
 init();

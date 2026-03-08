@@ -8,81 +8,81 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=YANDEX_API_KEY&lang=ru_RU&suppressMapOpenBlock=true"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
-        :root { --btn: #007AFF; --text: #1d1d1f; --danger: #FF3B30; --success: #34C759; --border: rgba(0,0,0,0.08); --bg-sec: #f5f5f7; --warn: #ff9500; }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; background: #fff; -webkit-tap-highlight-color: transparent; color: var(--text); }
+        :root { --btn: #007AFF; --text: #f3f4f6; --danger: #ff6b6b; --success: #34C759; --border: rgba(255,255,255,0.2); --bg-sec: rgba(23,23,28,0.42); --warn: #ffb84d; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; background: #0f1115; -webkit-tap-highlight-color: transparent; color: var(--text); }
         #map { position: absolute; inset: 0; z-index: 1; }
         [class*="-copyrights-pane"], [class*="-controls-pane"] { display: none !important; }
-        #welcomeScreen { position: fixed; inset: 0; z-index: 5000; background: var(--bg-sec); display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .welcome-card { background: #fff; width: 100%; max-width: 400px; padding: 32px; border-radius: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; }
+        #welcomeScreen { position: fixed; inset: 0; z-index: 5000; background: rgba(10,11,15,0.45); display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .welcome-card { background: linear-gradient(180deg, rgba(38,38,44,0.68), rgba(24,24,28,0.58)); width: 100%; max-width: 400px; padding: 32px; border-radius: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.14); text-align: center; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px) saturate(130%); -webkit-backdrop-filter: blur(20px) saturate(130%); }
         
         /* Смещение кнопок ниже (60px от верха вместо 20px) */
-        .top-controls { position: absolute; top: calc(env(safe-area-inset-top) + 66px); left: 15px; right: 15px; z-index: 2000; display: flex; justify-content: space-between; pointer-events: none; gap: 10px; align-items: center; }
+        .top-controls { position: absolute; top: calc(env(safe-area-inset-top) + 66px); left: 15px; right: 15px; z-index: 2000; display: flex; justify-content: flex-start; pointer-events: none; gap: 10px; align-items: center; flex-wrap: nowrap; }
         
-        .btn-top { background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(245,248,255,0.68)); color: var(--text); padding: 14px 22px; border-radius: 30px; font-weight: 700; border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 10px 30px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.75); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 16px; backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%); pointer-events: auto; transition: transform 0.18s, box-shadow 0.18s, background 0.18s; height: 54px; box-sizing: border-box; }
+        .btn-top { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)); color: #f3f4f6; padding: 14px 22px; border-radius: 30px; font-weight: 700; border: 1px solid rgba(255,255,255,0.22); box-shadow: 0 10px 25px rgba(0,0,0,0.22); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 16px; backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%); pointer-events: auto; transition: transform 0.18s, box-shadow 0.18s, background 0.18s; height: 54px; box-sizing: border-box; }
         .btn-top span:first-child { font-size: 20px; }
-        .btn-top:active { transform: scale(0.97); box-shadow: 0 6px 18px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.6); }
+        .btn-top:active { transform: scale(0.97); box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
         #listPointsBtn { max-width: calc(100% - 84px); }
         #routeLabelText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 56vw; display: inline-block; }
         .floating-save { position: absolute; top: calc(env(safe-area-inset-top) + 12px); left: 50%; transform: translateX(-50%); z-index: 2300; display: none; align-items: center; pointer-events: auto; }
-        .btn-save-glass { background: linear-gradient(180deg, rgba(90,173,255,0.42), rgba(10,132,255,0.3)); color: #05396b; border-radius: 16px; padding: 10px 14px; font-size: 13px; font-weight: 800; white-space: nowrap; border: 1px solid rgba(255,255,255,0.62); box-shadow: 0 10px 25px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.65); backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); cursor: pointer; transition: transform 0.18s, box-shadow 0.18s; }
+        .btn-save-glass { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)); color: #f3f4f6; border-radius: 16px; padding: 10px 14px; font-size: 13px; font-weight: 800; white-space: nowrap; border: 1px solid rgba(255,255,255,0.22); box-shadow: 0 10px 25px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2); backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%); cursor: pointer; transition: transform 0.18s, box-shadow 0.18s; }
         .btn-save-glass:active { transform: scale(0.98); box-shadow: 0 6px 14px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5); }
         
         .bottom-center-controls { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 2000; display: none; flex-direction: column; align-items: center; width: auto; max-width: 90%; }
-        .btn-add-main { background: linear-gradient(180deg, #4da2ff, #0a84ff); color: #fff; padding: 18px 32px; border-radius: 35px; font-weight: 700; border: 1px solid rgba(255,255,255,0.32); box-shadow: 0 12px 34px rgba(10,132,255,0.42), inset 0 1px 0 rgba(255,255,255,0.45); cursor: pointer; font-size: 16px; transition: transform 0.18s, box-shadow 0.18s; width: max-content; white-space: nowrap; }
-        .btn-add-main:active { transform: scale(0.98); box-shadow: 0 8px 20px rgba(10,132,255,0.36), inset 0 1px 0 rgba(255,255,255,0.34); }
+        .btn-add-main { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)); color: #f3f4f6; padding: 18px 32px; border-radius: 35px; font-weight: 700; border: 1px solid rgba(255,255,255,0.22); box-shadow: 0 12px 30px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.18); cursor: pointer; font-size: 16px; transition: transform 0.18s, box-shadow 0.18s; width: max-content; white-space: nowrap; }
+        .btn-add-main:active { transform: scale(0.98); box-shadow: 0 8px 18px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.15); }
         @media (max-width: 430px) {
             .floating-save { top: calc(env(safe-area-inset-top) + 10px); }
             .btn-save-glass { font-size: 11px; padding: 8px 10px; }
             .btn-add-main { font-size: 14px; padding: 16px 22px; }
         }
-        .modal { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.3); display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(10px); }
-        .modal-content { background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(244,248,255,0.68)); width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; display: flex; flex-direction: column; max-height: 90vh; animation: slideUp 0.4s cubic-bezier(0.2, 1, 0.3, 1); position: relative; padding-bottom: env(safe-area-inset-bottom); border: 1px solid rgba(255,255,255,0.62); backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%); }
+        .modal { position: fixed; inset: 0; z-index: 3000; background: rgba(4,6,10,0.45); display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+        .modal-content { background: linear-gradient(180deg, rgba(38,38,44,0.76), rgba(24,24,28,0.64)); width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; display: flex; flex-direction: column; max-height: 90vh; animation: slideUp 0.4s cubic-bezier(0.2, 1, 0.3, 1); position: relative; padding-bottom: env(safe-area-inset-bottom); border: 1px solid rgba(255,255,255,0.24); backdrop-filter: blur(24px) saturate(130%); -webkit-backdrop-filter: blur(24px) saturate(130%); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .btn-action { background: linear-gradient(180deg, #4da2ff, #0a84ff); color: #fff; border: 1px solid rgba(255,255,255,0.35); border-radius: 16px; padding: 16px; font-weight: 650; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; width: 100%; box-shadow: 0 12px 24px rgba(10,132,255,0.34), inset 0 1px 0 rgba(255,255,255,0.45); transition: transform 0.18s, box-shadow 0.18s; }
-        .btn-action:active { transform: scale(0.98); box-shadow: 0 8px 16px rgba(10,132,255,0.32), inset 0 1px 0 rgba(255,255,255,0.3); }
-        .btn-action.loading { background: #e5e5ea !important; color: #8e8e93 !important; pointer-events: none; opacity: 0.7; }
+        .btn-action { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)); color: #f3f4f6; border: 1px solid rgba(255,255,255,0.22); border-radius: 16px; padding: 16px; font-weight: 650; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; width: 100%; box-shadow: 0 12px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2); transition: transform 0.18s, box-shadow 0.18s; }
+        .btn-action:active { transform: scale(0.98); box-shadow: 0 8px 16px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.16); }
+        .btn-action.loading { background: linear-gradient(180deg, rgba(62,62,70,0.66), rgba(42,42,48,0.58)) !important; color: #c7c9d1 !important; pointer-events: none; opacity: 0.8; }
         .btn-action.saved { background: var(--success) !important; }
         .editor-section { padding: 0 20px 20px; overflow-y: auto; box-sizing: border-box; }
-        .settings-group { background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(246,249,255,0.74)); border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.62); overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.08); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+        .settings-group { background: linear-gradient(180deg, rgba(42,42,48,0.58), rgba(28,28,34,0.5)); border-radius: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.2); overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.22); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
         .settings-item { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); transition: 0.2s; cursor: pointer; }
-        input, textarea, select { width: 100%; padding: 14px; border: none; font-size: 16px; outline: none; background: transparent; color: var(--text); font-family: inherit; box-sizing: border-box; }
-        .input-wrapper { background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(245,248,255,0.74)); border-radius: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.62); display: flex; align-items: center; padding-right: 8px; box-sizing: border-box; box-shadow: 0 6px 16px rgba(0,0,0,0.08); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-        #tokenLoginBtn, #btnCreateFile { background: linear-gradient(180deg, #4da2ff, #0a84ff) !important; color: #fff !important; border: 1px solid rgba(255,255,255,0.35) !important; border-radius: 12px !important; box-shadow: 0 10px 20px rgba(10,132,255,0.3), inset 0 1px 0 rgba(255,255,255,0.45) !important; transition: transform 0.18s, box-shadow 0.18s; }
-        #tokenLoginBtn:active, #btnCreateFile:active { transform: scale(0.98); box-shadow: 0 6px 14px rgba(10,132,255,0.28), inset 0 1px 0 rgba(255,255,255,0.32) !important; }
+        input, textarea, select { width: 100%; padding: 14px; border: none; font-size: 16px; outline: none; background: transparent; color: #f5f7fa; font-family: inherit; box-sizing: border-box; }
+        .input-wrapper { background: linear-gradient(180deg, rgba(44,44,50,0.58), rgba(30,30,36,0.48)); border-radius: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; padding-right: 8px; box-sizing: border-box; box-shadow: 0 6px 16px rgba(0,0,0,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        #tokenLoginBtn, #btnCreateFile { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)) !important; color: #f3f4f6 !important; border: 1px solid rgba(255,255,255,0.22) !important; border-radius: 12px !important; box-shadow: 0 10px 20px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2) !important; transition: transform 0.18s, box-shadow 0.18s; }
+        #tokenLoginBtn:active, #btnCreateFile:active { transform: scale(0.98); box-shadow: 0 6px 14px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.15) !important; }
         .gist-list { max-height: 250px; overflow-y: auto; }
-        .gist-item { padding: 14px 16px; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); font-weight: 500; }
-        .gist-item.active { color: var(--btn); background: #f0f7ff; }
-        .color-dropdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 30px; padding: 12px; display: none; flex-direction: column; gap: 4px; z-index: 6000; box-shadow: 0 30px 100px rgba(0,0,0,0.3); width: 90%; max-width: 400px; }
-        .dropdown-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 5999; display: none; backdrop-filter: blur(4px); }
+        .gist-item { padding: 14px 16px; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); font-weight: 500; color: #e5e7eb; }
+        .gist-item.active { color: #ffffff; background: rgba(255,255,255,0.12); }
+        .color-dropdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(180deg, rgba(42,42,48,0.76), rgba(28,28,34,0.66)); border-radius: 30px; padding: 12px; display: none; flex-direction: column; gap: 4px; z-index: 6000; box-shadow: 0 30px 100px rgba(0,0,0,0.35); width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .dropdown-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 5999; display: none; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
         .color-row { display: flex; align-items: center; gap: 16px; padding: 14px; border-radius: 18px; cursor: pointer; }
         .swatch { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1); }
         .modal-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { margin: 0; font-size: 20px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .close-circle { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(242,244,248,0.7)); border: 1px solid rgba(255,255,255,0.7); color: #6b7280; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        #toast { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0,0,0,0.85); color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 14px; z-index: 9999; transition: 0.4s; opacity: 0; backdrop-filter: blur(10px); font-weight: 700; }
+        .close-circle { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(180deg, rgba(52,52,58,0.68), rgba(36,36,42,0.58)); border: 1px solid rgba(255,255,255,0.2); color: #f3f4f6; cursor: pointer; box-shadow: 0 6px 14px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        #toast { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 50%; transform: translateX(-50%) translateY(-100px); background: linear-gradient(180deg, rgba(40,40,45,0.76), rgba(28,28,32,0.68)); color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 14px; z-index: 9999; transition: 0.4s; opacity: 0; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.2); font-weight: 700; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         #toast.info { background: rgba(0,0,0,0.82); }
         #toast.success { background: rgba(52,199,89,0.95); }
         #toast.error { background: rgba(255,59,48,0.95); }
         #toast.loading { background: rgba(0,122,255,0.95); }
-        .sortable-point-item { background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(245,249,255,0.76)); padding: 16px; border-radius: 20px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.62); position: relative; box-sizing: border-box; width: 100%; box-shadow: 0 8px 20px rgba(0,0,0,0.08); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-        .sortable-point-item.active { border-color: rgba(0,122,255,0.55); box-shadow: 0 0 0 2px rgba(0,122,255,0.15); }
+        .sortable-point-item { background: linear-gradient(180deg, rgba(44,44,50,0.62), rgba(30,30,36,0.54)); padding: 16px; border-radius: 20px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2); position: relative; box-sizing: border-box; width: 100%; box-shadow: 0 8px 20px rgba(0,0,0,0.22); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .sortable-point-item.active { border-color: rgba(255,255,255,0.32); box-shadow: 0 0 0 2px rgba(255,255,255,0.1); }
         .sort-handle { position: absolute; top: 12px; right: 12px; color: #d1d1d6; cursor: grab; font-size: 20px; padding: 4px; }
         .item-main-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-right: 35px; width: 100%; box-sizing: border-box; }
-        .point-number-text { font-size: 18px; font-weight: 800; color: var(--btn); min-width: 24px; text-align: center; flex-shrink: 0; }
+        .point-number-text { font-size: 18px; font-weight: 800; color: #d1d5db; min-width: 24px; text-align: center; flex-shrink: 0; }
         .color-indicator-btn { width: 36px; height: 36px; min-width: 36px; min-height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-shrink: 0; box-sizing: border-box; }
-        .btn-item-action { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.65); background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(244,247,252,0.74)); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 6px 14px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .btn-item-action { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.22); background: linear-gradient(180deg, rgba(40,40,45,0.36), rgba(28,28,32,0.3)); color: #f3f4f6; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.16); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         .item-actions { display: flex; gap: 8px; margin-top: 12px; width: 100%; }
-        .section-title { font-size: 12px; font-weight: 600; color: #8e8e93; text-transform: uppercase; margin: 0 0 8px 16px; letter-spacing: 0.5px; display: block; }
-        select.cmd-select { background: var(--bg-sec); border-radius: 12px; padding: 10px 12px; font-weight: 500; appearance: none; white-space: normal; height: auto; line-height: 1.3; overflow: visible; flex-grow: 1; width: 10px; }
+        .section-title { font-size: 12px; font-weight: 600; color: #c7c9d1; text-transform: uppercase; margin: 0 0 8px 16px; letter-spacing: 0.5px; display: block; }
+        select.cmd-select { background: linear-gradient(180deg, rgba(46,46,52,0.58), rgba(32,32,38,0.5)); border-radius: 12px; padding: 10px 12px; font-weight: 500; appearance: none; white-space: normal; height: auto; line-height: 1.3; overflow: visible; flex-grow: 1; width: 10px; color: #f3f4f6; border: 1px solid rgba(255,255,255,0.2); }
         /* Обновленные стили для комментария */
-        .comm-input { background: linear-gradient(180deg, rgba(255,255,255,0.88), rgba(247,250,255,0.78)); border: 1px solid rgba(255,255,255,0.65); border-radius: 12px; margin-top: 8px; padding: 12px; font-size: 13px; resize: none; width: 100%; display: block; box-sizing: border-box; caret-color: #000; overflow: hidden; min-height: 44px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.7); }
+        .comm-input { background: linear-gradient(180deg, rgba(46,46,52,0.6), rgba(34,34,40,0.52)); border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; margin-top: 8px; padding: 12px; font-size: 13px; resize: none; width: 100%; display: block; box-sizing: border-box; caret-color: #fff; color: #f3f4f6; overflow: hidden; min-height: 44px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15); }
     </style>
 </head>
 <body>
 
 <div id="toast">Готово</div>
-<div id="welcomeScreen"><div class="welcome-card"><h2 style="margin: 0 0 8px 0; font-weight:800;">Route Editor</h2><div id="userIdBadge" style="background:#f2f2f7;color:#8e8e93;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:18px">Загрузка...</div><div class="input-wrapper" style="margin-bottom:10px;"><input id="tokenInput" type="password" placeholder="Введите GitHub token" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="tokenLoginBtn" style="background:var(--btn); color:#fff; border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="submitToken()">Войти</button></div><div style="font-size:13px; color:#8e8e93; margin-top:6px;">Токен нужно вводить при каждом запуске</div></div></div>
+<div id="welcomeScreen"><div class="welcome-card"><h2 style="margin: 0 0 8px 0; font-weight:800;">Route Editor</h2><div id="userIdBadge" style="background:rgba(255,255,255,0.12);color:#d1d5db;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:18px;border:1px solid rgba(255,255,255,0.2)">Загрузка...</div><div class="input-wrapper" style="margin-bottom:10px;"><input id="tokenInput" type="password" placeholder="Введите GitHub token" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="tokenLoginBtn" style="border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="submitToken()">Войти</button></div><div style="font-size:13px; color:#c7c9d1; margin-top:6px;">Токен нужно вводить при каждом запуске</div></div></div>
 <div id="map"></div>
 <div class="top-controls" id="uiControls" style="display:none"><button id="listPointsBtn" class="btn-top" onclick="openPointsOrderModal()" style="visibility:hidden"><span>📋</span> <span id="routeLabelText">Маршрут</span></button><button class="btn-top" onclick="openSettingsModal()"><span>⚙️</span></button></div>
 <div class="bottom-center-controls" id="bottomControls"><button id="addMarkerBtn" class="btn-add-main" onclick="handleAddBtnClick()" style="visibility:hidden"><span id="addText">Добавить новую точку</span></button></div>
@@ -90,8 +90,8 @@
 <div id="dropdownOverlay" class="dropdown-overlay" onclick="closeD()"></div>
 <div id="listColorDropdown" class="color-dropdown"></div>
 
-<div id="pointsOrderModal" class="modal" onclick="if(event.target===this) toggleM('pointsOrderModal')"><div class="modal-content"><div class="modal-header"><h3 id="orderModalTitle">Маршрут</h3><button class="close-circle" onclick="toggleM('pointsOrderModal')">✕</button></div><div class="editor-section" id="pointsSortList"></div><div style="padding: 20px;"><button id="saveInListBtn" class="btn-action" style="background: var(--success);" onclick="handleModalSave()"><span id="saveBtnText">Готово</span></button></div></div></div>
-<div id="settingsModal" class="modal" onclick="if(event.target===this) toggleM('settingsModal')"><div class="modal-content"><div class="modal-header"><h3>Настройки</h3><button class="close-circle" onclick="toggleM('settingsModal')">✕</button></div><div class="editor-section"><span class="section-title">Новый маршрут</span><div class="input-wrapper"><input type="text" id="newRouteName" placeholder="Название (A-Z, 0-9)" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')"><button id="btnCreateFile" style="background:var(--btn); color:#fff; border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="handleCreateNew()">Создать</button></div><span class="section-title">Список файлов</span><div class="settings-group gist-list" id="settingsGistList"></div><div id="fileActions" style="display:none; margin-top:10px;"><span class="section-title" id="activeFileNameDisplay">Управление файлом</span><div class="settings-group"><div class="settings-item" onclick="shareActiveRoute()"><span style="font-weight: 500;">🔗 Скопировать ссылку</span><span style="color:var(--btn); font-size: 20px;">›</span></div><div class="settings-item" onclick="deleteActiveRoute()"><span style="font-weight: 500; color: var(--danger);">🗑️ Удалить маршрут</span></div></div></div></div></div></div>
+<div id="pointsOrderModal" class="modal" onclick="if(event.target===this) toggleM('pointsOrderModal')"><div class="modal-content"><div class="modal-header"><h3 id="orderModalTitle">Маршрут</h3><button class="close-circle" onclick="toggleM('pointsOrderModal')">✕</button></div><div class="editor-section" id="pointsSortList"></div><div style="padding: 20px;"><button id="saveInListBtn" class="btn-action" onclick="handleModalSave()"><span id="saveBtnText">Готово</span></button></div></div></div>
+<div id="settingsModal" class="modal" onclick="if(event.target===this) toggleM('settingsModal')"><div class="modal-content"><div class="modal-header"><h3>Настройки</h3><button class="close-circle" onclick="toggleM('settingsModal')">✕</button></div><div class="editor-section"><span class="section-title">Новый маршрут</span><div class="input-wrapper"><input type="text" id="newRouteName" placeholder="Название (A-Z, 0-9)" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')"><button id="btnCreateFile" style="border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="handleCreateNew()">Создать</button></div><span class="section-title">Список файлов</span><div class="settings-group gist-list" id="settingsGistList"></div><div id="fileActions" style="display:none; margin-top:10px;"><span class="section-title" id="activeFileNameDisplay">Управление файлом</span><div class="settings-group"><div class="settings-item" onclick="shareActiveRoute()"><span style="font-weight: 500;">🔗 Скопировать ссылку</span><span style="color:#d1d5db; font-size: 20px;">›</span></div><div class="settings-item" onclick="deleteActiveRoute()"><span style="font-weight: 500; color: var(--danger);">🗑️ Удалить маршрут</span></div></div></div></div></div></div>
 
 <script>
 const $ = id => document.getElementById(id), f6 = n => Math.round(n * 1e6) / 1e6, tg = window.Telegram.WebApp, tgU = tg.initDataUnsafe?.user;
@@ -201,7 +201,7 @@ ymaps.ready(() => {
             const newPoint = addP(e.get('coords'), { ...tempNewPointData });
             pushHistorySnapshot();
             updateSaveState();
-            setActivePoint(newPoint, true);
+            setActivePoint(newPoint, false);
             startDrawingForPoint(newPoint, true);
             tempNewPointData = null;
         }
@@ -241,9 +241,9 @@ const handleInitialAuth = async () => {
 };
 const ensureUserGist = async () => { if(userGistId) return true; const gists = await api(`https://api.github.com/gists?per_page=100&t=${Date.now()}`); if(!gists) return false; const ex = gists.find(g => g.description?.includes(`[${USER_ID}]`)); if(ex) { userGistId = ex.id; return true; } const cr = await api('https://api.github.com/gists', 'POST', { description: GIST_DESC, public: true, files: { ".init": { content: "Init" } } }); if(cr) { userGistId = cr.id; return true; } return false; };
 const refreshFileList = async () => {
-    const cont = $('settingsGistList'); cont.innerHTML = '<div style="padding:20px;text-align:center;color:#8e8e93;">Обновление...</div>';
+    const cont = $('settingsGistList'); cont.innerHTML = '<div style="padding:20px;text-align:center;color:#c7c9d1;">Обновление...</div>';
     const g = await api(`https://api.github.com/gists/${userGistId}?t=${Date.now()}`); if(!g) return;
-    const files = Object.keys(g.files).filter(fn => fn.endsWith('.json')); cont.innerHTML = files.length ? '' : '<div style="text-align:center;padding:20px;color:#8e8e93">Нет маршрутов</div>';
+    const files = Object.keys(g.files).filter(fn => fn.endsWith('.json')); cont.innerHTML = files.length ? '' : '<div style="text-align:center;padding:20px;color:#c7c9d1">Нет маршрутов</div>';
     files.forEach(fn => cont.appendChild(Object.assign(document.createElement('div'), { className: `gist-item ${curFile === fn ? 'active' : ''}`, onclick: () => loadRoute(fn), innerHTML: `<span>${fn.replace('.json','')}</span>` })));
     updateVisibility();
 };
@@ -315,7 +315,7 @@ const startDrawingForPoint = (p, isNewPoint = false) => {
     $('addMarkerBtn').classList.remove('active');
     $('addMarkerBtn').classList.add('drawing');
     cur = p;
-    setActivePoint(p, true);
+    setActivePoint(p, !isNewPoint);
     p.line.editor.startDrawing();
     p.pm.options.set('draggable', true);
 };
@@ -386,7 +386,7 @@ function startEditPath(p) {
 
 function openPointsOrderModal() {
     modalMode = 'list'; const list = $('pointsSortList'); list.innerHTML = ''; $('orderModalTitle').textContent = curFile ? curFile.replace('.json', '') : "Маршрут"; $('saveInListBtn').style.display = 'none';
-    if (!points.length) list.innerHTML = '<div style="text-align:center;padding:40px;color:#8e8e93;font-weight:500;">Маршрут пока пуст</div>'; else points.forEach(p => list.appendChild(createPointCard(p)));
+    if (!points.length) list.innerHTML = '<div style="text-align:center;padding:40px;color:#c7c9d1;font-weight:500;">Маршрут пока пуст</div>'; else points.forEach(p => list.appendChild(createPointCard(p)));
     syncActiveListCard();
     toggleM('pointsOrderModal');
 }

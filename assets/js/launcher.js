@@ -147,7 +147,7 @@ async function createRoute() {
 async function renameRoute() {
   if (!state.selected) return;
   const currentName = state.selected.replace('.json', '');
-  const nextRaw = prompt('Новое название маршрута', currentName);
+  const nextRaw = prompt('Новое название маршрута (разрешены: a-z, 0-9, _)', currentName);
   if (nextRaw === null) return;
   const nextName = nextRaw.trim().replace(/[^a-zA-Z0-9_]/g, '');
   if (!nextName) {

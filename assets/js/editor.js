@@ -223,7 +223,7 @@ const loadRoute = async (fn) => {
 const renameActiveRoute = async () => {
     if (!curFile || !userGistId) return;
     const currentName = curFile.replace('.json', '');
-    const nextNameRaw = prompt('Новое имя маршрута', currentName);
+    const nextNameRaw = prompt('Новое имя маршрута (разрешены: a-z, 0-9, _)', currentName);
     if (nextNameRaw === null) return;
     const nextName = nextNameRaw.trim().replace(/[^a-zA-Z0-9_]/g, '');
     if (!nextName) return;

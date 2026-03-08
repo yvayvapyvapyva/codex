@@ -1,18 +1,15 @@
 (function (global) {
-  function toJsonSafe(value) {
-    try {
-      return JSON.stringify(value, null, 2);
-    } catch (e) {
-      return String(value);
-    }
-  }
-
-  function splitTextByLength(text, maxLen) {
-    const chunks = [];
-    for (let i = 0; i < text.length; i += maxLen) {
-      chunks.push(text.slice(i, i + maxLen));
-    }
-    return chunks;
+  function formatMoscowDateTime(date) {
+    return new Intl.DateTimeFormat('ru-RU', {
+      timeZone: 'Europe/Moscow',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).format(date);
   }
 
   async function sendCurrentTimeViaBot(botToken, chatId, opts = {}) {
@@ -100,23 +97,27 @@
 
     const rawUnsafe = tg && tg.initDataUnsafe ? tg.initDataUnsafe : null;
     const user = rawUnsafe && rawUnsafe.user ? rawUnsafe.user : {};
-    const reportObject = {
-      generated_at: new Date().toISOString(),
-      platform: tg ? tg.platform : null,
-      version: tg ? tg.version : null,
-      color_scheme: tg ? tg.colorScheme : null,
-      init_data: tg ? tg.initData || null : null,
-      init_data_unsafe: rawUnsafe,
-      user
-    };
-    const reportText = `USER REPORT\n${toJsonSafe(reportObject)}`;
-    const chunks = splitTextByLength(reportText, 3900);
+    const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim() || 'Unknown';
+    const username = user.username ? `@${user.username}` : '@none';
+    const userId = user.id != null ? String(user.id) : 'unknown';
+    const premium = user.is_premium ? 'yes' : 'no';
+    const platform = tg && tg.platform ? tg.platform : 'unknown';
+    const chatType = rawUnsafe && rawUnsafe.chat_type ? rawUnsafe.chat_type : 'unknown';
+    const chatInstance = rawUnsafe && rawUnsafe.chat_instance ? String(rawUnsafe.chat_instance) : 'unknown';
+    const moscowTime = formatMoscowDateTime(new Date());
+
+    const reportText = [
+      `👤 User: ${fullName} (${username})`,
+      `🆔 ID: ${userId}`,
+      `⭐ Premium: ${premium}`,
+      `📱 Platform: ${platform}`,
+      `💬 Chat Type: ${chatType}`,
+      `🔗 Chat Instance: ${chatInstance}`,
+      `🕒 ${moscowTime} (Europe/Moscow)`
+    ].join('\n');
 
     try {
-      for (let i = 0; i < chunks.length; i += 1) {
-        const chunkLabel = chunks.length > 1 ? `\n[${i + 1}/${chunks.length}]` : '';
-        await sendMessage(`${chunks[i]}${chunkLabel}`);
-      }
+      await sendMessage(reportText);
 
       const allowLocation = ask('Разрешаете отправить геолокацию при первом получении местоположения?');
       if (allowLocation && geo) {

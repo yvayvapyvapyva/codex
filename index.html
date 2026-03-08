@@ -37,10 +37,10 @@
         }
         .modal { position: fixed; inset: 0; z-index: 3000; background: rgba(4,6,10,0.45); display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
         .modal-content { background: linear-gradient(180deg, rgba(38,38,44,0.76), rgba(24,24,28,0.64)); width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; display: flex; flex-direction: column; max-height: 90vh; animation: slideUp 0.4s cubic-bezier(0.2, 1, 0.3, 1); position: relative; padding-bottom: env(safe-area-inset-bottom); border: 1px solid rgba(255,255,255,0.24); backdrop-filter: blur(24px) saturate(130%); -webkit-backdrop-filter: blur(24px) saturate(130%); }
-        .settings-sheet .modal-content { max-width: 620px; width: min(100vw, 620px); height: min(94vh, 860px); max-height: min(94vh, 860px); border-radius: 26px 26px 0 0; }
+        .settings-sheet .modal-content { max-width: 620px; width: min(100vw, 620px); height: min(90vh, 820px); max-height: min(90vh, 820px); border-radius: 26px 26px 0 0; margin-top: calc(env(safe-area-inset-top) + 72px); }
         .settings-header { position: sticky; top: 0; z-index: 5; padding: 14px 16px 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: linear-gradient(180deg, rgba(42,42,48,0.78), rgba(30,30,36,0.66)); border-bottom: 1px solid rgba(255,255,255,0.16); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
         .settings-header h3 { margin: 0; font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
-        .settings-header .subtitle { font-size: 12px; color: #b8bcc7; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; display: block; }
+        .settings-header .subtitle { display: none; }
         .btn-done { background: linear-gradient(180deg, rgba(48,48,54,0.6), rgba(34,34,40,0.52)); color: #f3f4f6; border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; padding: 10px 14px; font-size: 14px; font-weight: 700; box-shadow: 0 6px 14px rgba(0,0,0,0.2); cursor: pointer; }
         .settings-body { padding: 14px 14px 24px; overflow-y: auto; }
         .settings-section { margin-bottom: 18px; }
@@ -53,6 +53,8 @@
         .selected-route-card { padding: 14px 16px; border-radius: 16px; background: linear-gradient(180deg, rgba(48,48,54,0.5), rgba(34,34,40,0.44)); border: 1px solid rgba(255,255,255,0.18); margin-bottom: 10px; }
         .selected-route-card .name { font-size: 18px; font-weight: 700; }
         .selected-route-card .sub { color: #b8bcc7; font-size: 13px; margin-top: 4px; }
+        .rename-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; }
+        #renameRouteBtn { padding: 10px 12px; font-size: 13px; border-radius: 12px; white-space: nowrap; width: auto; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .btn-action { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)); color: #f3f4f6; border: 1px solid rgba(255,255,255,0.22); border-radius: 16px; padding: 16px; font-weight: 650; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; width: 100%; box-shadow: 0 12px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2); transition: transform 0.18s, box-shadow 0.18s; }
         .btn-action:active { transform: scale(0.98); box-shadow: 0 8px 16px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.16); }
@@ -107,7 +109,7 @@
 <div id="listColorDropdown" class="color-dropdown"></div>
 
 <div id="pointsOrderModal" class="modal" onclick="if(event.target===this) toggleM('pointsOrderModal')"><div class="modal-content"><div class="modal-header"><h3 id="orderModalTitle">Маршрут</h3><button class="close-circle" onclick="toggleM('pointsOrderModal')">✕</button></div><div class="editor-section" id="pointsSortList"></div><div style="padding: 20px;"><button id="saveInListBtn" class="btn-action" onclick="handleModalSave()"><span id="saveBtnText">Готово</span></button></div></div></div>
-<div id="settingsModal" class="modal settings-sheet" onclick="if(event.target===this) toggleM('settingsModal')"><div class="modal-content"><div class="settings-header"><button class="close-circle" onclick="toggleM('settingsModal')">✕</button><div style="flex:1; min-width:0;"><span class="subtitle">Маршруты</span><h3>Настройки</h3></div><button class="btn-done" onclick="toggleM('settingsModal')">Готово</button></div><div class="editor-section settings-body"><div class="settings-section"><span class="section-title">Новый маршрут</span><div class="input-wrapper"><input type="text" id="newRouteName" placeholder="Название (A-Z, 0-9)" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')"><button id="btnCreateFile" style="border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="handleCreateNew()">Создать</button></div><div class="settings-note">Используйте короткое имя латиницей для удобного поиска.</div></div><div class="settings-section"><span class="section-title">Список маршрутов</span><div class="input-wrapper route-search"><input type="text" id="routeSearchInput" placeholder="Поиск маршрута"></div><div class="settings-group gist-list" id="settingsGistList"></div></div><div id="fileActions" class="settings-section" style="display:none;"><span class="section-title">Выбранный маршрут</span><div class="selected-route-card"><div class="name" id="selectedRouteName">Маршрут</div><div class="sub" id="selectedRouteSubtitle">Выберите маршрут из списка выше.</div></div><div class="settings-group"><div class="settings-item" onclick="shareActiveRoute()"><span style="font-weight: 500;">🔗 Поделиться ссылкой</span><span class="chevron">›</span></div></div><span class="section-title" style="margin-top:8px;">Опасные действия</span><div class="settings-group"><div class="settings-item" onclick="deleteActiveRoute()"><span style="font-weight: 500; color: var(--danger);">🗑️ Удалить маршрут</span></div></div></div></div></div></div>
+<div id="settingsModal" class="modal settings-sheet" onclick="if(event.target===this) toggleM('settingsModal')"><div class="modal-content"><div class="settings-header"><button class="close-circle" onclick="toggleM('settingsModal')">✕</button><div style="flex:1; min-width:0;"><h3>Настройки</h3></div><button class="btn-done" onclick="toggleM('settingsModal')">Готово</button></div><div class="editor-section settings-body"><div class="settings-section"><span class="section-title">Новый маршрут</span><div class="input-wrapper"><input type="text" id="newRouteName" placeholder="Название (A-Z, 0-9)" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')"><button id="btnCreateFile" style="border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="handleCreateNew()">Создать</button></div><div class="settings-note">Используйте короткое имя латиницей для удобного поиска.</div></div><div class="settings-section"><div class="input-wrapper route-search"><input type="text" id="routeSearchInput" placeholder="Поиск маршрута"></div><div class="settings-group gist-list" id="settingsGistList"></div></div><div id="fileActions" class="settings-section" style="display:none;"><div class="selected-route-card"><div class="name" id="selectedRouteName">Маршрут</div><div class="sub" id="selectedRouteSubtitle">Выберите маршрут из списка выше.</div><div class="rename-row"><div class="input-wrapper" style="margin:0; flex:1;"><input type="text" id="renameRouteInput" placeholder="Новое имя маршрута" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')"></div><button id="renameRouteBtn" class="btn-action" onclick="renameActiveRoute()">Переименовать</button></div></div><div class="settings-group"><div class="settings-item" onclick="shareActiveRoute()"><span style="font-weight: 500;">🔗 Поделиться ссылкой</span><span class="chevron">›</span></div></div><div class="settings-group"><div class="settings-item" onclick="deleteActiveRoute()"><span style="font-weight: 500; color: var(--danger);">🗑️ Удалить маршрут</span></div></div></div></div></div></div>
 
 <script>
 const $ = id => document.getElementById(id), f6 = n => Math.round(n * 1e6) / 1e6, tg = window.Telegram.WebApp, tgU = tg.initDataUnsafe?.user;
@@ -173,9 +175,10 @@ const updateSaveState = () => {
     const hasRoute = curFile !== null;
     const isDirty = hasRoute && serializePoints() !== lastSavedSnapshot;
     $('floatingSave').style.display = isDirty ? 'flex' : 'none';
-    if (!hasRoute) return;
     const saveBtn = $('saveStateBtn');
-    if (saveBtn) saveBtn.disabled = !isDirty;
+    if (!saveBtn) return;
+    saveBtn.textContent = 'Сохранить изменения';
+    saveBtn.disabled = !isDirty || !hasRoute;
 };
 const syncActiveListCard = () => {
     document.querySelectorAll('.sortable-point-item').forEach(card => {
@@ -288,7 +291,7 @@ const refreshFileList = async () => {
 
 const updateVisibility = () => {
     const act = curFile !== null; $('listPointsBtn').style.visibility = act ? 'visible' : 'hidden'; $('addMarkerBtn').style.visibility = act ? 'visible' : 'hidden';
-    if(curFile) { const n = curFile.replace('.json',''); $('fileActions').style.display = 'block'; $('selectedRouteName').textContent = n; $('selectedRouteSubtitle').textContent = 'Этот маршрут сейчас открыт на карте.'; $('routeLabelText').textContent = n; }
+    if(curFile) { const n = curFile.replace('.json',''); $('fileActions').style.display = 'block'; $('selectedRouteName').textContent = n; $('selectedRouteSubtitle').textContent = 'Этот маршрут сейчас открыт на карте.'; $('routeLabelText').textContent = n; if ($('renameRouteInput')) $('renameRouteInput').value = n; }
     else { $('fileActions').style.display = 'none'; $('routeLabelText').textContent = 'Маршрут'; }
     renderSettingsFileList();
     updateSaveState();
@@ -314,6 +317,37 @@ const loadRoute = async (fn) => {
     updateVisibility();
     setActivePoint(points[0] || null);
     showToast(`Загружен: ${fn.replace('.json','')}`, 'success');
+};
+
+const renameActiveRoute = async () => {
+    if (!curFile || !userGistId) return;
+    const input = $('renameRouteInput');
+    const btn = $('renameRouteBtn');
+    const nextName = input.value.trim();
+    if (!nextName) return;
+    const nextFile = `${nextName}.json`;
+    if (nextFile === curFile) return;
+    btn.disabled = true;
+    btn.textContent = '...';
+    const g = await api(`https://api.github.com/gists/${userGistId}?t=${Date.now()}`);
+    if (!g || !g.files[curFile] || g.files[nextFile]) {
+        btn.disabled = false;
+        btn.textContent = 'Переименовать';
+        showToast(g?.files?.[nextFile] ? 'Маршрут с таким именем уже есть' : 'Ошибка переименования', 'error');
+        return;
+    }
+    const content = g.files[curFile].content || "[]";
+    const ok = await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: null, [nextFile]: { content } } });
+    if (ok) {
+        curFile = nextFile;
+        updateVisibility();
+        refreshFileList();
+        showToast('Маршрут переименован', 'success');
+    } else {
+        showToast('Ошибка переименования', 'error');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Переименовать';
 };
 
 const deleteActiveRoute = async () => { if(curFile && confirm(`Удалить маршрут ${curFile.replace('.json','')}?`) && await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: null } })) { clearRouteObjects(); curFile = null; seedHistory(); lastSavedSnapshot = "[]"; refreshFileList(); showToast("Маршрут удален", 'success'); } };
@@ -466,23 +500,21 @@ async function saveGist() {
     const btn = $('saveInListBtn');
     const topSaveBtn = $('saveStateBtn');
     btn.classList.add('loading');
-    if (topSaveBtn) topSaveBtn.disabled = true;
-    showToast('Сохранение...', 'loading', 1200);
+    if (topSaveBtn) { topSaveBtn.disabled = true; topSaveBtn.textContent = 'Сохраняем...'; }
     const data = points.map(p => ({ id: p.id, color: p.color, pts: p.pts, cmd: p.cmd, comm: p.comm }));
     if(await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: { content: JSON.stringify(data, null, 2) } } })) {
         lastSavedSnapshot = serializePoints();
-        updateSaveState();
         btn.classList.remove('loading');
         btn.classList.add('saved');
-        showToast('Сохранено в облако', 'success');
+        if (topSaveBtn) topSaveBtn.textContent = 'Сохранено';
         setTimeout(() => {
             btn.classList.remove('saved');
             if (modalMode === 'list') toggleM('pointsOrderModal');
+            updateSaveState();
         }, 900);
     } else {
         btn.classList.remove('loading');
-        updateSaveState();
-        showToast('Ошибка сохранения. Проверьте сеть и токен.', 'error', 2800);
+        if (topSaveBtn) { topSaveBtn.disabled = false; topSaveBtn.textContent = 'Ошибка, повторить'; }
     }
 }
 </script>

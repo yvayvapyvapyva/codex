@@ -37,6 +37,22 @@
         }
         .modal { position: fixed; inset: 0; z-index: 3000; background: rgba(4,6,10,0.45); display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
         .modal-content { background: linear-gradient(180deg, rgba(38,38,44,0.76), rgba(24,24,28,0.64)); width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; display: flex; flex-direction: column; max-height: 90vh; animation: slideUp 0.4s cubic-bezier(0.2, 1, 0.3, 1); position: relative; padding-bottom: env(safe-area-inset-bottom); border: 1px solid rgba(255,255,255,0.24); backdrop-filter: blur(24px) saturate(130%); -webkit-backdrop-filter: blur(24px) saturate(130%); }
+        .settings-sheet .modal-content { max-width: 620px; width: min(100vw, 620px); height: min(94vh, 860px); max-height: min(94vh, 860px); border-radius: 26px 26px 0 0; }
+        .settings-header { position: sticky; top: 0; z-index: 5; padding: 14px 16px 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: linear-gradient(180deg, rgba(42,42,48,0.78), rgba(30,30,36,0.66)); border-bottom: 1px solid rgba(255,255,255,0.16); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+        .settings-header h3 { margin: 0; font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+        .settings-header .subtitle { font-size: 12px; color: #b8bcc7; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; display: block; }
+        .btn-done { background: linear-gradient(180deg, rgba(48,48,54,0.6), rgba(34,34,40,0.52)); color: #f3f4f6; border: 1px solid rgba(255,255,255,0.22); border-radius: 12px; padding: 10px 14px; font-size: 14px; font-weight: 700; box-shadow: 0 6px 14px rgba(0,0,0,0.2); cursor: pointer; }
+        .settings-body { padding: 14px 14px 24px; overflow-y: auto; }
+        .settings-section { margin-bottom: 18px; }
+        .settings-note { font-size: 12px; color: #b8bcc7; margin: 8px 4px 0; }
+        .route-search { margin-bottom: 10px; }
+        .route-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .route-item .meta { color: #b8bcc7; font-size: 12px; }
+        .route-item.active .meta { color: #f3f4f6; }
+        .route-item .chevron { color: #cfd3dd; font-size: 18px; }
+        .selected-route-card { padding: 14px 16px; border-radius: 16px; background: linear-gradient(180deg, rgba(48,48,54,0.5), rgba(34,34,40,0.44)); border: 1px solid rgba(255,255,255,0.18); margin-bottom: 10px; }
+        .selected-route-card .name { font-size: 18px; font-weight: 700; }
+        .selected-route-card .sub { color: #b8bcc7; font-size: 13px; margin-top: 4px; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .btn-action { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)); color: #f3f4f6; border: 1px solid rgba(255,255,255,0.22); border-radius: 16px; padding: 16px; font-weight: 650; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; width: 100%; box-shadow: 0 12px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2); transition: transform 0.18s, box-shadow 0.18s; }
         .btn-action:active { transform: scale(0.98); box-shadow: 0 8px 16px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.16); }
@@ -49,7 +65,7 @@
         .input-wrapper { background: linear-gradient(180deg, rgba(44,44,50,0.58), rgba(30,30,36,0.48)); border-radius: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; padding-right: 8px; box-sizing: border-box; box-shadow: 0 6px 16px rgba(0,0,0,0.2); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
         #tokenLoginBtn, #btnCreateFile { background: linear-gradient(180deg, rgba(40,40,45,0.44), rgba(28,28,32,0.34)) !important; color: #f3f4f6 !important; border: 1px solid rgba(255,255,255,0.22) !important; border-radius: 12px !important; box-shadow: 0 10px 20px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2) !important; transition: transform 0.18s, box-shadow 0.18s; }
         #tokenLoginBtn:active, #btnCreateFile:active { transform: scale(0.98); box-shadow: 0 6px 14px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.15) !important; }
-        .gist-list { max-height: 250px; overflow-y: auto; }
+        .gist-list { max-height: 320px; overflow-y: auto; }
         .gist-item { padding: 14px 16px; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); font-weight: 500; color: #e5e7eb; }
         .gist-item.active { color: #ffffff; background: rgba(255,255,255,0.12); }
         .color-dropdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(180deg, rgba(42,42,48,0.76), rgba(28,28,34,0.66)); border-radius: 30px; padding: 12px; display: none; flex-direction: column; gap: 4px; z-index: 6000; box-shadow: 0 30px 100px rgba(0,0,0,0.35); width: 90%; max-width: 400px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
@@ -91,7 +107,7 @@
 <div id="listColorDropdown" class="color-dropdown"></div>
 
 <div id="pointsOrderModal" class="modal" onclick="if(event.target===this) toggleM('pointsOrderModal')"><div class="modal-content"><div class="modal-header"><h3 id="orderModalTitle">Маршрут</h3><button class="close-circle" onclick="toggleM('pointsOrderModal')">✕</button></div><div class="editor-section" id="pointsSortList"></div><div style="padding: 20px;"><button id="saveInListBtn" class="btn-action" onclick="handleModalSave()"><span id="saveBtnText">Готово</span></button></div></div></div>
-<div id="settingsModal" class="modal" onclick="if(event.target===this) toggleM('settingsModal')"><div class="modal-content"><div class="modal-header"><h3>Настройки</h3><button class="close-circle" onclick="toggleM('settingsModal')">✕</button></div><div class="editor-section"><span class="section-title">Новый маршрут</span><div class="input-wrapper"><input type="text" id="newRouteName" placeholder="Название (A-Z, 0-9)" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')"><button id="btnCreateFile" style="border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="handleCreateNew()">Создать</button></div><span class="section-title">Список файлов</span><div class="settings-group gist-list" id="settingsGistList"></div><div id="fileActions" style="display:none; margin-top:10px;"><span class="section-title" id="activeFileNameDisplay">Управление файлом</span><div class="settings-group"><div class="settings-item" onclick="shareActiveRoute()"><span style="font-weight: 500;">🔗 Скопировать ссылку</span><span style="color:#d1d5db; font-size: 20px;">›</span></div><div class="settings-item" onclick="deleteActiveRoute()"><span style="font-weight: 500; color: var(--danger);">🗑️ Удалить маршрут</span></div></div></div></div></div></div>
+<div id="settingsModal" class="modal settings-sheet" onclick="if(event.target===this) toggleM('settingsModal')"><div class="modal-content"><div class="settings-header"><button class="close-circle" onclick="toggleM('settingsModal')">✕</button><div style="flex:1; min-width:0;"><span class="subtitle">Маршруты</span><h3>Настройки</h3></div><button class="btn-done" onclick="toggleM('settingsModal')">Готово</button></div><div class="editor-section settings-body"><div class="settings-section"><span class="section-title">Новый маршрут</span><div class="input-wrapper"><input type="text" id="newRouteName" placeholder="Название (A-Z, 0-9)" oninput="this.value = this.value.replace(/[^a-zA-Z0-9_]/g, '')"><button id="btnCreateFile" style="border:none; padding:8px 16px; border-radius:12px; font-weight:700; margin-right:4px;" onclick="handleCreateNew()">Создать</button></div><div class="settings-note">Используйте короткое имя латиницей для удобного поиска.</div></div><div class="settings-section"><span class="section-title">Список маршрутов</span><div class="input-wrapper route-search"><input type="text" id="routeSearchInput" placeholder="Поиск маршрута"></div><div class="settings-group gist-list" id="settingsGistList"></div></div><div id="fileActions" class="settings-section" style="display:none;"><span class="section-title">Выбранный маршрут</span><div class="selected-route-card"><div class="name" id="selectedRouteName">Маршрут</div><div class="sub" id="selectedRouteSubtitle">Выберите маршрут из списка выше.</div></div><div class="settings-group"><div class="settings-item" onclick="shareActiveRoute()"><span style="font-weight: 500;">🔗 Поделиться ссылкой</span><span class="chevron">›</span></div></div><span class="section-title" style="margin-top:8px;">Опасные действия</span><div class="settings-group"><div class="settings-item" onclick="deleteActiveRoute()"><span style="font-weight: 500; color: var(--danger);">🗑️ Удалить маршрут</span></div></div></div></div></div></div>
 
 <script>
 const $ = id => document.getElementById(id), f6 = n => Math.round(n * 1e6) / 1e6, tg = window.Telegram.WebApp, tgU = tg.initDataUnsafe?.user;
@@ -100,7 +116,7 @@ const USER_NAME = tgU ? (tgU.first_name + (tgU.last_name ? " " + tgU.last_name :
 const USER_UNAME = tgU?.username ? `@${tgU.username}` : "", GIST_DESC = `[${USER_ID}] User: ${USER_NAME} ${USER_UNAME}`;
 const COLORS = { Gold: { hex: '#FFD700', label: 'Маневры на перекрестке' }, Blue: { hex: '#007AFF', label: 'Разворот вне перекрестка' }, Red: { hex: '#FF3B30', label: 'Разгон до максимальной скорости' }, Fuchsia: { hex: '#AF52DE', label: 'Остановка и начало движения на подъем' }, Orange: { hex: '#FF9500', label: 'Левые и правые повороты' }, Purple: { hex: '#5856D6', label: 'Параллельная парковка и гараж' }, Cyan: { hex: '#5AC8FA', label: 'Разворот в ограниченном пространстве' }, Brown: { hex: '#A2845E', label: 'Остановка' }, Lime: { hex: '#34C759', label: 'Начало движения' } };
 const COMMAND_SETS = { Gold: ["На перекрестке повернем налево", "На перекрестке едем прямо", "На перекрестке повернем направо", "На перекрестке выполним разворот", "На круговом движении первый съезд", "На круговом движении второй съезд", "На круговом движении третий съезд", "На круговом движении четвертый съезд", "На круговом движении выполним разворот", "На регулируемом перекрестке повернем налево", "На регулируемом перекрестке едем прямо", "На регулируемом перекрестке повернем направо", "На регулируемом перекрестке выполним разворот", "На нерегулируемом перекрестке повернем налево", "На нерегулируемом перекрестке едем прямо", "На нерегулируемом перекрестке повернем направо", "На нерегулируемом перекрестке выполним разворот", "Выполним разворот в ближайшем разрешенном месте"], Blue: ["Выполним разворот вне перекрестка", "Выполним разворот в ближайшем разрешенном месте", "Найдите место для разворота и развернитесь"], Red: ["Выполняем разгон до максимальной скорости", "Набираем максимальную скорость на данном участке дороги", "Разгоняемся до максимальной разрешенной скорости"], Fuchsia: ["По моей команде выполним остановку и начало движения на подъеме", "Выполняем остановку и начало движения на подъеме"], Orange: ["Поворачиваем направо", "Поворачиваем налево", "Далее повернем направо", "Далее повернем налево", "На светофоре повернем направо", "На светофоре повернем налево", "Поворачиваем направо к ленте", "Поворачиваем направо на заправку", "Едем в прямом направлении"], Purple: ["Выполняем параллельную парковку и гараж"], Cyan: ["Выполняем разворот в ограниченном пространстве", "Выполним разворот в ограниченном пространстве с использованием передачи заднего хода"], Brown: ["Выполняем остановку параллельно краю проезжей части", "Выполняем остановку в ближайшем разрешенном месте"], Lime: ["Начинаем движение", "Как будете готовы начинаем движение"] };
-let map, points = [], cur = null, isAdd = false, isDrawing = false, curFile = null, userGistId = null, activeListPoint = null, modalMode = 'list', tempNewPointData = null, userLocPlacemark = null, activePoint = null, authToken = "";
+let map, points = [], cur = null, isAdd = false, isDrawing = false, curFile = null, userGistId = null, activeListPoint = null, modalMode = 'list', tempNewPointData = null, userLocPlacemark = null, activePoint = null, authToken = "", settingsRouteFiles = [];
 let historyStack = [], historyIndex = -1, lastSavedSnapshot = "[]", toastTimer = null;
 
 const showToast = (text, type = 'info', duration = 2200) => {
@@ -220,6 +236,8 @@ ymaps.ready(() => {
     
     localStorage.removeItem('gh_t_optimized');
     const input = $('tokenInput');
+    const routeSearchInput = $('routeSearchInput');
+    if (routeSearchInput) routeSearchInput.addEventListener('input', renderSettingsFileList);
     input.focus();
     input.addEventListener('keydown', e => { if (e.key === 'Enter') submitToken(); });
     showToast("Введите токен для входа", 'info');
@@ -240,18 +258,39 @@ const handleInitialAuth = async () => {
     }
 };
 const ensureUserGist = async () => { if(userGistId) return true; const gists = await api(`https://api.github.com/gists?per_page=100&t=${Date.now()}`); if(!gists) return false; const ex = gists.find(g => g.description?.includes(`[${USER_ID}]`)); if(ex) { userGistId = ex.id; return true; } const cr = await api('https://api.github.com/gists', 'POST', { description: GIST_DESC, public: true, files: { ".init": { content: "Init" } } }); if(cr) { userGistId = cr.id; return true; } return false; };
+const renderSettingsFileList = () => {
+    const cont = $('settingsGistList');
+    const q = $('routeSearchInput')?.value?.trim().toLowerCase() || "";
+    const files = settingsRouteFiles.filter(fn => fn.replace('.json', '').toLowerCase().includes(q));
+    if (!files.length) {
+        cont.innerHTML = `<div style="text-align:center;padding:20px;color:#c7c9d1">${settingsRouteFiles.length ? 'Ничего не найдено' : 'Нет маршрутов'}</div>`;
+        return;
+    }
+    cont.innerHTML = '';
+    files.forEach(fn => {
+        const active = curFile === fn;
+        const name = fn.replace('.json', '');
+        const row = Object.assign(document.createElement('div'), {
+            className: `gist-item route-item ${active ? 'active' : ''}`,
+            onclick: () => loadRoute(fn),
+            innerHTML: `<span>${name}</span><span class="meta">${active ? 'Текущий' : 'Открыть'}</span><span class="chevron">›</span>`
+        });
+        cont.appendChild(row);
+    });
+};
 const refreshFileList = async () => {
     const cont = $('settingsGistList'); cont.innerHTML = '<div style="padding:20px;text-align:center;color:#c7c9d1;">Обновление...</div>';
     const g = await api(`https://api.github.com/gists/${userGistId}?t=${Date.now()}`); if(!g) return;
-    const files = Object.keys(g.files).filter(fn => fn.endsWith('.json')); cont.innerHTML = files.length ? '' : '<div style="text-align:center;padding:20px;color:#c7c9d1">Нет маршрутов</div>';
-    files.forEach(fn => cont.appendChild(Object.assign(document.createElement('div'), { className: `gist-item ${curFile === fn ? 'active' : ''}`, onclick: () => loadRoute(fn), innerHTML: `<span>${fn.replace('.json','')}</span>` })));
+    settingsRouteFiles = Object.keys(g.files).filter(fn => fn.endsWith('.json')).sort((a, b) => a.localeCompare(b));
+    renderSettingsFileList();
     updateVisibility();
 };
 
 const updateVisibility = () => {
     const act = curFile !== null; $('listPointsBtn').style.visibility = act ? 'visible' : 'hidden'; $('addMarkerBtn').style.visibility = act ? 'visible' : 'hidden';
-    if(curFile) { const n = curFile.replace('.json',''); $('fileActions').style.display = 'block'; $('activeFileNameDisplay').textContent = `Маршрут: ${n}`; $('routeLabelText').textContent = n; }
+    if(curFile) { const n = curFile.replace('.json',''); $('fileActions').style.display = 'block'; $('selectedRouteName').textContent = n; $('selectedRouteSubtitle').textContent = 'Этот маршрут сейчас открыт на карте.'; $('routeLabelText').textContent = n; }
     else { $('fileActions').style.display = 'none'; $('routeLabelText').textContent = 'Маршрут'; }
+    renderSettingsFileList();
     updateSaveState();
 };
 
@@ -279,7 +318,7 @@ const loadRoute = async (fn) => {
 
 const deleteActiveRoute = async () => { if(curFile && confirm(`Удалить маршрут ${curFile.replace('.json','')}?`) && await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: null } })) { clearRouteObjects(); curFile = null; seedHistory(); lastSavedSnapshot = "[]"; refreshFileList(); showToast("Маршрут удален", 'success'); } };
 const shareActiveRoute = () => { if(!curFile) return; const link = `t.me/e_ia_bot/nav?startapp=${USER_ID}-${curFile.replace('.json','')}`, el = document.createElement('textarea'); el.value = link; document.body.appendChild(el); el.select(); document.execCommand('copy'); document.body.removeChild(el); showToast("Ссылка скопирована", 'success'); };
-const openSettingsModal = () => { refreshFileList(); toggleM('settingsModal'); };
+const openSettingsModal = () => { const si = $('routeSearchInput'); if (si) si.value = ''; refreshFileList(); toggleM('settingsModal'); };
 const toggleM = id => { const m = $(id); m.style.display = (m.style.display === 'none' || !m.style.display) ? 'flex' : 'none'; };
 const closeD = () => { document.querySelectorAll('.color-dropdown').forEach(dr => dr.style.display = 'none'); $('dropdownOverlay').style.display = 'none'; };
 const toggleD = id => { const d = $(id), vis = d.style.display === 'flex'; closeD(); if(!vis) { d.style.display = 'flex'; $('dropdownOverlay').style.display = 'block'; } };

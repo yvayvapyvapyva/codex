@@ -207,8 +207,7 @@ async function deleteRoute() {
 async function copyRouteLink() {
   if (!state.selected) return;
   const routeName = state.selected.replace('.json', '');
-  const tokenParam = getTokenParam();
-  const link = `https://t.me/e_ia_bot/nav?startapp=${state.user.id}-${routeName}&t=${encodeURIComponent(tokenParam)}`;
+  const link = `https://t.me/e_ia_bot/nav?startapp=${state.user.id}-${routeName}`;
   let copied = false;
   try {
     await navigator.clipboard.writeText(link);

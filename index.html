@@ -8,7 +8,7 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=YANDEX_API_KEY&lang=ru_RU&suppressMapOpenBlock=true"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
-        :root { --btn: #007AFF; --text: #1d1d1f; --danger: #FF3B30; --success: #34C759; --border: rgba(0,0,0,0.08); --bg-sec: #f5f5f7; }
+        :root { --btn: #007AFF; --text: #1d1d1f; --danger: #FF3B30; --success: #34C759; --border: rgba(0,0,0,0.08); --bg-sec: #f5f5f7; --warn: #ff9500; }
         body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, system-ui, sans-serif; overflow: hidden; background: #fff; -webkit-tap-highlight-color: transparent; color: var(--text); }
         #map { position: absolute; inset: 0; z-index: 1; }
         [class*="-copyrights-pane"], [class*="-controls-pane"] { display: none !important; }
@@ -21,6 +21,19 @@
         .btn-top { background: rgba(255,255,255,0.9); color: var(--text); padding: 14px 22px; border-radius: 30px; font-weight: 700; border: 1px solid var(--border); box-shadow: 0 8px 25px rgba(0,0,0,0.1); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 16px; backdrop-filter: blur(20px); pointer-events: auto; transition: 0.2s; height: 54px; box-sizing: border-box; }
         .btn-top span:first-child { font-size: 20px; }
         .btn-top:active { transform: scale(0.96); background: #fff; }
+        .mode-chip { position: absolute; top: calc(env(safe-area-inset-top) + 124px); left: 15px; z-index: 2100; background: rgba(255,255,255,0.95); border: 1px solid var(--border); border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; backdrop-filter: blur(20px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); display: none; pointer-events: none; }
+        .mode-chip.mode-view { color: #6e6e73; }
+        .mode-chip.mode-add { color: var(--warn); }
+        .mode-chip.mode-draw { color: var(--btn); }
+        .history-controls { position: absolute; top: calc(env(safe-area-inset-top) + 124px); right: 15px; z-index: 2100; display: none; gap: 8px; }
+        .btn-history { background: rgba(255,255,255,0.95); color: var(--text); border: 1px solid var(--border); border-radius: 16px; width: 44px; height: 44px; cursor: pointer; font-size: 18px; box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+        .btn-history:disabled { opacity: 0.45; cursor: default; }
+        .workflow-hint { position: absolute; bottom: calc(106px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(90vw, 360px); z-index: 2100; background: rgba(0,0,0,0.75); color: #fff; border-radius: 16px; padding: 10px 14px; font-size: 13px; line-height: 1.4; display: none; text-align: center; backdrop-filter: blur(8px); }
+        .floating-save { position: absolute; right: 16px; bottom: calc(30px + env(safe-area-inset-bottom)); z-index: 2100; display: none; align-items: center; gap: 10px; }
+        .floating-save-indicator { background: rgba(0,0,0,0.65); color: #fff; border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+        .floating-save-indicator.clean { background: rgba(52,199,89,0.9); }
+        .btn-save-floating { background: var(--btn); color: #fff; border: none; border-radius: 999px; height: 54px; padding: 0 18px; font-weight: 800; font-size: 15px; box-shadow: 0 10px 30px rgba(0,122,255,0.35); cursor: pointer; }
+        .btn-save-floating:disabled { opacity: 0.65; cursor: default; }
         
         .bottom-center-controls { position: absolute; bottom: calc(30px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 2000; display: none; flex-direction: column; align-items: center; width: auto; max-width: 90%; }
         .btn-add-main { background: var(--btn); color: #fff; padding: 18px 32px; border-radius: 35px; font-weight: 700; border: none; box-shadow: 0 10px 30px rgba(0,122,255,0.3); cursor: pointer; font-size: 16px; transition: 0.3s; width: max-content; white-space: nowrap; }
@@ -45,9 +58,14 @@
         .modal-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
         .modal-header h3 { margin: 0; font-size: 20px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .close-circle { width: 32px; height: 32px; border-radius: 50%; background: #e5e5ea; border: none; color: #8e8e93; cursor: pointer; }
-        #toast { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0,0,0,0.85); color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 14px; z-index: 9999; transition: 0.4s; opacity: 0; backdrop-filter: blur(10px); }
+        #toast { position: fixed; top: calc(env(safe-area-inset-top) + 10px); left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0,0,0,0.85); color: #fff; padding: 10px 20px; border-radius: 50px; font-size: 14px; z-index: 9999; transition: 0.4s; opacity: 0; backdrop-filter: blur(10px); font-weight: 700; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        #toast.info { background: rgba(0,0,0,0.82); }
+        #toast.success { background: rgba(52,199,89,0.95); }
+        #toast.error { background: rgba(255,59,48,0.95); }
+        #toast.loading { background: rgba(0,122,255,0.95); }
         .sortable-point-item { background: #fff; padding: 16px; border-radius: 20px; margin-bottom: 12px; border: 1px solid var(--border); position: relative; box-sizing: border-box; width: 100%; }
+        .sortable-point-item.active { border-color: rgba(0,122,255,0.55); box-shadow: 0 0 0 2px rgba(0,122,255,0.15); }
         .sort-handle { position: absolute; top: 12px; right: 12px; color: #d1d1d6; cursor: grab; font-size: 20px; padding: 4px; }
         .item-main-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-right: 35px; width: 100%; box-sizing: border-box; }
         .point-number-text { font-size: 18px; font-weight: 800; color: var(--btn); min-width: 24px; text-align: center; flex-shrink: 0; }
@@ -66,7 +84,11 @@
 <div id="welcomeScreen"><div class="welcome-card"><h2 style="margin: 0 0 8px 0; font-weight:800;">Route Editor</h2><div id="userIdBadge" style="background:#f2f2f7;color:#8e8e93;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block;margin-bottom:24px">Загрузка...</div><div style="font-size:14px; color:#8e8e93; margin-top:10px;">Авторизация через токен...</div></div></div>
 <div id="map"></div>
 <div class="top-controls" id="uiControls" style="display:none"><button id="listPointsBtn" class="btn-top" onclick="openPointsOrderModal()" style="visibility:hidden"><span>📋</span> <span id="routeLabelText">Маршрут</span></button><button class="btn-top" onclick="openSettingsModal()"><span>⚙️</span></button></div>
+<div id="modeChip" class="mode-chip mode-view">Режим: просмотр</div>
+<div id="historyControls" class="history-controls"><button id="undoBtn" class="btn-history" onclick="undoHistory()" title="Отменить" disabled>↶</button><button id="redoBtn" class="btn-history" onclick="redoHistory()" title="Повторить" disabled>↷</button></div>
 <div class="bottom-center-controls" id="bottomControls"><button id="addMarkerBtn" class="btn-add-main" onclick="handleAddBtnClick()" style="visibility:hidden"><span id="addText">Добавить новую точку</span></button></div>
+<div id="workflowHint" class="workflow-hint"></div>
+<div id="floatingSave" class="floating-save"><div id="saveStateBadge" class="floating-save-indicator">Сохранено</div><button id="floatingSaveBtn" class="btn-save-floating" onclick="saveGist()">Сохранить</button></div>
 <div id="dropdownOverlay" class="dropdown-overlay" onclick="closeD()"></div>
 <div id="listColorDropdown" class="color-dropdown"></div>
 
@@ -80,26 +102,136 @@ const USER_NAME = tgU ? (tgU.first_name + (tgU.last_name ? " " + tgU.last_name :
 const USER_UNAME = tgU?.username ? `@${tgU.username}` : "", GIST_DESC = `[${USER_ID}] User: ${USER_NAME} ${USER_UNAME}`;
 const COLORS = { Gold: { hex: '#FFD700', label: 'Маневры на перекрестке' }, Blue: { hex: '#007AFF', label: 'Разворот вне перекрестка' }, Red: { hex: '#FF3B30', label: 'Разгон до максимальной скорости' }, Fuchsia: { hex: '#AF52DE', label: 'Остановка и начало движения на подъем' }, Orange: { hex: '#FF9500', label: 'Левые и правые повороты' }, Purple: { hex: '#5856D6', label: 'Параллельная парковка и гараж' }, Cyan: { hex: '#5AC8FA', label: 'Разворот в ограниченном пространстве' }, Brown: { hex: '#A2845E', label: 'Остановка' }, Lime: { hex: '#34C759', label: 'Начало движения' } };
 const COMMAND_SETS = { Gold: ["На перекрестке повернем налево", "На перекрестке едем прямо", "На перекрестке повернем направо", "На перекрестке выполним разворот", "На круговом движении первый съезд", "На круговом движении второй съезд", "На круговом движении третий съезд", "На круговом движении четвертый съезд", "На круговом движении выполним разворот", "На регулируемом перекрестке повернем налево", "На регулируемом перекрестке едем прямо", "На регулируемом перекрестке повернем направо", "На регулируемом перекрестке выполним разворот", "На нерегулируемом перекрестке повернем налево", "На нерегулируемом перекрестке едем прямо", "На нерегулируемом перекрестке повернем направо", "На нерегулируемом перекрестке выполним разворот", "Выполним разворот в ближайшем разрешенном месте"], Blue: ["Выполним разворот вне перекрестка", "Выполним разворот в ближайшем разрешенном месте", "Найдите место для разворота и развернитесь"], Red: ["Выполняем разгон до максимальной скорости", "Набираем максимальную скорость на данном участке дороги", "Разгоняемся до максимальной разрешенной скорости"], Fuchsia: ["По моей команде выполним остановку и начало движения на подъеме", "Выполняем остановку и начало движения на подъеме"], Orange: ["Поворачиваем направо", "Поворачиваем налево", "Далее повернем направо", "Далее повернем налево", "На светофоре повернем направо", "На светофоре повернем налево", "Поворачиваем направо к ленте", "Поворачиваем направо на заправку", "Едем в прямом направлении"], Purple: ["Выполняем параллельную парковку и гараж"], Cyan: ["Выполняем разворот в ограниченном пространстве", "Выполним разворот в ограниченном пространстве с использованием передачи заднего хода"], Brown: ["Выполняем остановку параллельно краю проезжей части", "Выполняем остановку в ближайшем разрешенном месте"], Lime: ["Начинаем движение", "Как будете готовы начинаем движение"] };
-let map, points = [], cur = null, isAdd = false, isDrawing = false, curFile = null, userGistId = null, activeListPoint = null, modalMode = 'list', tempNewPointData = null, userLocPlacemark = null;
+let map, points = [], cur = null, isAdd = false, isDrawing = false, curFile = null, userGistId = null, activeListPoint = null, modalMode = 'list', tempNewPointData = null, userLocPlacemark = null, activePoint = null;
+let historyStack = [], historyIndex = -1, lastSavedSnapshot = "[]", hintTimer = null, toastTimer = null;
 
-const showToast = (t) => { const el = $('toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2000); };
+const showToast = (text, type = 'info', duration = 2200) => {
+    const el = $('toast');
+    el.textContent = text;
+    el.className = '';
+    el.classList.add(type || 'info');
+    if (toastTimer) clearTimeout(toastTimer);
+    el.classList.add('show');
+    toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+};
 const getSvg = (col, txt, az, isEnd) => { const s = isEnd ? 34 : 40, c = s/2; return 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}"><g transform="rotate(${az},${c},${c})"><polygon points="${c},2 ${s*0.75},${s-5} ${c},${s*0.65} ${s*0.25},${s-5}" fill="${col}" stroke="#000" stroke-width="1.5"/></g><circle cx="${c}" cy="${c}" r="${isEnd?7:9}" fill="${col}" stroke="#000" stroke-width="1"/><text x="${c}" y="${c+3}" font-size="10" font-family="Arial" font-weight="bold" text-anchor="middle" fill="#000" stroke="#fff" stroke-width="2.5" style="paint-order:stroke fill">${txt}</text></svg>`); };
 const getUserLocSvg = () => 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#007AFF" stroke="white" stroke-width="3"/><circle cx="12" cy="12" r="11" fill="none" stroke="#007AFF" stroke-width="1" opacity="0.3"/></svg>`);
 const calcA = (p1, p2) => p1 && p2 ? Math.round((Math.atan2(Math.cos(Math.PI/180*p1[0])*(p2[1]-p1[1]), p2[0]-p1[0])*180/Math.PI+360)%360) : 0;
 const api = async (u, m = 'GET', b = null) => { const t = localStorage.getItem('gh_t_optimized'); if(!t) return null; const r = await fetch(u, { method: m, headers: { Authorization: `token ${t}`, 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : null }); return r.ok ? (r.status !== 204 ? r.json() : true) : null; };
+const serializePoints = () => JSON.stringify(points.map(p => ({ id: p.id, color: p.color, pts: p.pts, cmd: p.cmd, comm: p.comm })));
+const clearRouteObjects = () => {
+    points.forEach(p => { map.geoObjects.remove(p.pm); map.geoObjects.remove(p.line); if (p.pmEnd) map.geoObjects.remove(p.pmEnd); });
+    points = [];
+    activePoint = null;
+};
+const updateHistoryButtons = () => {
+    $('undoBtn').disabled = historyIndex <= 0;
+    $('redoBtn').disabled = historyIndex >= historyStack.length - 1;
+};
+const seedHistory = () => {
+    historyStack = [serializePoints()];
+    historyIndex = 0;
+    updateHistoryButtons();
+};
+const pushHistorySnapshot = () => {
+    const snap = serializePoints();
+    if (historyStack[historyIndex] === snap) return;
+    historyStack = historyStack.slice(0, historyIndex + 1);
+    historyStack.push(snap);
+    historyIndex = historyStack.length - 1;
+    updateHistoryButtons();
+};
+const updateSaveState = () => {
+    const hasRoute = curFile !== null;
+    const isDirty = hasRoute && serializePoints() !== lastSavedSnapshot;
+    $('floatingSave').style.display = hasRoute ? 'flex' : 'none';
+    if (!hasRoute) return;
+    const badge = $('saveStateBadge');
+    badge.textContent = isDirty ? 'Есть изменения' : 'Сохранено';
+    badge.classList.toggle('clean', !isDirty);
+    $('floatingSaveBtn').disabled = !isDirty;
+};
+const syncActiveListCard = () => {
+    document.querySelectorAll('.sortable-point-item').forEach(card => {
+        card.classList.toggle('active', !!activePoint && parseInt(card.dataset.id) === activePoint.id);
+    });
+};
+const setActivePoint = (p, center = false) => {
+    activePoint = p || null;
+    points.forEach(pt => {
+        const active = activePoint && pt === activePoint;
+        pt.line.options.set({ strokeWidth: active ? 8 : 5, strokeOpacity: active ? 1 : 0.8 });
+        pt.pm.options.set('zIndex', active ? 1800 : 1000);
+        if (pt.pmEnd) pt.pmEnd.options.set('zIndex', active ? 1600 : 800);
+    });
+    if (center && activePoint?.pts?.length) map.setCenter(activePoint.pts[0]);
+    syncActiveListCard();
+};
+const applySnapshot = (snapshot) => {
+    const data = JSON.parse(snapshot || "[]");
+    clearRouteObjects();
+    data.forEach(d => addP(d.pts[0], d, true));
+    recalculateIds();
+    setActivePoint(null);
+    updateSaveState();
+};
+const undoHistory = () => {
+    if (historyIndex <= 0) return;
+    historyIndex -= 1;
+    applySnapshot(historyStack[historyIndex]);
+    updateHistoryButtons();
+    showToast('Действие отменено', 'info');
+};
+const redoHistory = () => {
+    if (historyIndex >= historyStack.length - 1) return;
+    historyIndex += 1;
+    applySnapshot(historyStack[historyIndex]);
+    updateHistoryButtons();
+    showToast('Действие повторено', 'info');
+};
+const showHint = (text, hold = false) => {
+    const hint = $('workflowHint');
+    if (hintTimer) clearTimeout(hintTimer);
+    if (!text) { hint.style.display = 'none'; return; }
+    hint.textContent = text;
+    hint.style.display = 'block';
+    if (!hold) hintTimer = setTimeout(() => hint.style.display = 'none', 3200);
+};
+const updateModeUI = () => {
+    const chip = $('modeChip');
+    let modeText = 'Режим: просмотр', modeClass = 'mode-view';
+    if (isDrawing) { modeText = 'Режим: рисование пути'; modeClass = 'mode-draw'; }
+    else if (isAdd) { modeText = 'Режим: добавление точки'; modeClass = 'mode-add'; }
+    chip.textContent = modeText;
+    chip.className = `mode-chip ${modeClass}`;
+};
 
 ymaps.ready(() => {
     tg.expand(); if (tg.setHeaderColor) tg.setHeaderColor('secondary_bg_color');
     $('userIdBadge').textContent = `ID: ${USER_ID}`;
+    updateModeUI();
     map = new ymaps.Map("map", { center: [56.3399, 43.9332], zoom: 17, type: 'yandex#satellite', controls: [] });
     userLocPlacemark = new ymaps.Placemark([0,0], {}, { iconLayout: 'default#image', iconImageHref: getUserLocSvg(), iconImageSize: [24,24], iconImageOffset: [-12,-12], zIndex: 5000, visible: false });
     map.geoObjects.add(userLocPlacemark); initGeolocation();
-    map.events.add('click', e => { if(isAdd && tempNewPointData) { $('addText').textContent = "Рисуйте путь..."; startDrawingForPoint(addP(e.get('coords'), { ...tempNewPointData })); tempNewPointData = null; } });
+    map.events.add('click', e => {
+        if(isAdd && tempNewPointData) {
+            const newPoint = addP(e.get('coords'), { ...tempNewPointData });
+            pushHistorySnapshot();
+            updateSaveState();
+            setActivePoint(newPoint, true);
+            startDrawingForPoint(newPoint, true);
+            tempNewPointData = null;
+            showHint('Шаг 2/3: нарисуйте путь для точки. Завершите кнопкой "Завершить рисование пути".', true);
+        }
+    });
     initColorDropdown('listColorDropdown', (h, n) => {
         if(activeListPoint) {
+            pushHistorySnapshot();
             const { point: p, card: c } = activeListPoint; p.color = n; c.querySelector('.color-indicator-btn').style.background = h;
             const sel = c.querySelector('.cmd-select'); updateCommandOptions(sel, n, ""); p.cmd = sel.value;
             if (p.line) { p.line.options.set('strokeColor', h); updI(p); if(p.pmEnd) updPI(p); } activeListPoint = null;
+            pushHistorySnapshot();
+            updateSaveState();
         }
     });
     new Sortable($('pointsSortList'), { animation: 150, handle: '.sort-handle', ghostClass: 'sortable-ghost', onEnd: reorderPointsFromList });
@@ -111,7 +243,7 @@ ymaps.ready(() => {
     if(localStorage.getItem('gh_t_optimized')) { 
         handleInitialAuth(); 
     } else {
-        showToast("Токен не найден в URL");
+        showToast("Токен не найден в URL", 'error');
     }
 });
 
@@ -121,9 +253,11 @@ const handleInitialAuth = async () => {
         $('welcomeScreen').style.display = 'none'; 
         $('uiControls').style.display = 'flex'; 
         $('bottomControls').style.display = 'flex'; 
+        $('modeChip').style.display = 'block';
+        $('historyControls').style.display = 'flex';
         refreshFileList(); 
     } else {
-        showToast("Ошибка авторизации. Проверьте токен.");
+        showToast("Ошибка авторизации. Проверьте токен.", 'error');
     }
 };
 const ensureUserGist = async () => { if(userGistId) return true; const gists = await api(`https://api.github.com/gists?per_page=100&t=${Date.now()}`); if(!gists) return false; const ex = gists.find(g => g.description?.includes(`[${USER_ID}]`)); if(ex) { userGistId = ex.id; return true; } const cr = await api('https://api.github.com/gists', 'POST', { description: GIST_DESC, public: true, files: { ".init": { content: "Init" } } }); if(cr) { userGistId = cr.id; return true; } return false; };

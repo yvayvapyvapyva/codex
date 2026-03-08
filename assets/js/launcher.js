@@ -134,14 +134,9 @@ async function createRoute() {
     return;
   }
 
-  state.routes = await fetchRoutes();
-  renderRoutes();
-  state.selected = fileName;
-  ui.routesSelect.value = fileName;
-  ui.openActions.style.display = 'block';
-  hideLoading();
-  showRoutesScreen();
-  notify('Маршрут создан.');
+  const tokenParam = getTokenParam();
+  const routeName = fileName.replace('.json', '');
+  window.location.href = `editor.html?route=${encodeURIComponent(routeName)}&t=${encodeURIComponent(tokenParam)}`;
 }
 
 async function renameRoute() {

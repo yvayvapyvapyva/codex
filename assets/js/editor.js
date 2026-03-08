@@ -162,6 +162,7 @@ const handleInitialAuth = async () => {
 const ensureUserGist = async () => { if(userGistId) return true; const gists = await api(`https://api.github.com/gists?per_page=100&t=${Date.now()}`); if(!gists) return false; const ex = gists.find(g => g.description?.includes(`[${USER_ID}]`)); if(ex) { userGistId = ex.id; return true; } const cr = await api('https://api.github.com/gists', 'POST', { description: GIST_DESC, public: true, files: { ".init": { content: "Init" } } }); if(cr) { userGistId = cr.id; return true; } return false; };
 const renderSettingsFileList = () => {
     const cont = $('settingsGistList');
+    if (!cont) return;
     const q = $('routeSearchInput')?.value?.trim().toLowerCase() || "";
     const files = settingsRouteFiles.filter(fn => fn.replace('.json', '').toLowerCase().includes(q));
     if (!files.length) {
@@ -181,7 +182,8 @@ const renderSettingsFileList = () => {
     });
 };
 const refreshFileList = async () => {
-    const cont = $('settingsGistList'); cont.innerHTML = '<div style="padding:20px;text-align:center;color:#c7c9d1;">Обновление...</div>';
+    const cont = $('settingsGistList');
+    if (cont) cont.innerHTML = '<div style="padding:20px;text-align:center;color:#c7c9d1;">Обновление...</div>';
     const g = await api(`https://api.github.com/gists/${userGistId}?t=${Date.now()}`); if(!g) return;
     settingsRouteFiles = Object.keys(g.files).filter(fn => fn.endsWith('.json')).sort((a, b) => a.localeCompare(b));
     renderSettingsFileList();
@@ -190,8 +192,8 @@ const refreshFileList = async () => {
 
 const updateVisibility = () => {
     const act = curFile !== null; $('listPointsBtn').style.visibility = act ? 'visible' : 'hidden'; $('addMarkerBtn').style.visibility = act ? 'visible' : 'hidden';
-    if(curFile) { const n = curFile.replace('.json',''); $('fileActions').style.display = 'block'; $('selectedRouteName').textContent = n; $('selectedRouteSubtitle').textContent = 'Этот маршрут сейчас открыт на карте.'; $('routeLabelText').textContent = n; if ($('renameRouteInput')) $('renameRouteInput').value = n; }
-    else { $('fileActions').style.display = 'none'; $('routeLabelText').textContent = 'Маршрут'; }
+    if(curFile) { const n = curFile.replace('.json',''); if ($('fileActions')) $('fileActions').style.display = 'block'; $('routeLabelText').textContent = n; }
+    else { if ($('fileActions')) $('fileActions').style.display = 'none'; $('routeLabelText').textContent = 'Маршрут'; }
     renderSettingsFileList();
     updateSaveState();
 };
@@ -220,18 +222,15 @@ const loadRoute = async (fn) => {
 
 const renameActiveRoute = async () => {
     if (!curFile || !userGistId) return;
-    const input = $('renameRouteInput');
-    const btn = $('renameRouteBtn');
-    const nextName = input.value.trim();
+    const currentName = curFile.replace('.json', '');
+    const nextNameRaw = prompt('Новое имя маршрута', currentName);
+    if (nextNameRaw === null) return;
+    const nextName = nextNameRaw.trim().replace(/[^a-zA-Z0-9_]/g, '');
     if (!nextName) return;
     const nextFile = `${nextName}.json`;
     if (nextFile === curFile) return;
-    btn.disabled = true;
-    btn.textContent = '...';
     const g = await api(`https://api.github.com/gists/${userGistId}?t=${Date.now()}`);
     if (!g || !g.files[curFile] || g.files[nextFile]) {
-        btn.disabled = false;
-        btn.textContent = 'Переименовать';
         showToast(g?.files?.[nextFile] ? 'Маршрут с таким именем уже есть' : 'Ошибка переименования', 'error');
         return;
     }
@@ -245,8 +244,6 @@ const renameActiveRoute = async () => {
     } else {
         showToast('Ошибка переименования', 'error');
     }
-    btn.disabled = false;
-    btn.textContent = 'Переименовать';
 };
 
 const deleteActiveRoute = async () => { if(curFile && confirm(`Удалить маршрут ${curFile.replace('.json','')}?`) && await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: null } })) { clearRouteObjects(); curFile = null; seedHistory(); lastSavedSnapshot = "[]"; refreshFileList(); showToast("Маршрут удален", 'success'); } };

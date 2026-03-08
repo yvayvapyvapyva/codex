@@ -16,11 +16,13 @@
         .welcome-card { background: #fff; width: 100%; max-width: 400px; padding: 32px; border-radius: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); text-align: center; }
         
         /* Смещение кнопок ниже (60px от верха вместо 20px) */
-        .top-controls { position: absolute; top: calc(env(safe-area-inset-top) + 60px); left: 15px; right: 15px; z-index: 2000; display: flex; justify-content: space-between; pointer-events: none; gap: 10px; }
+        .top-controls { position: absolute; top: calc(env(safe-area-inset-top) + 60px); left: 15px; right: 15px; z-index: 2000; display: flex; justify-content: space-between; pointer-events: none; gap: 10px; align-items: center; }
         
         .btn-top { background: rgba(255,255,255,0.9); color: var(--text); padding: 14px 22px; border-radius: 30px; font-weight: 700; border: 1px solid var(--border); box-shadow: 0 8px 25px rgba(0,0,0,0.1); cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 16px; backdrop-filter: blur(20px); pointer-events: auto; transition: 0.2s; height: 54px; box-sizing: border-box; }
         .btn-top span:first-child { font-size: 20px; }
         .btn-top:active { transform: scale(0.96); background: #fff; }
+        #listPointsBtn { max-width: calc(100% - 84px); }
+        #routeLabelText { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 56vw; display: inline-block; }
         .mode-chip { position: absolute; top: calc(env(safe-area-inset-top) + 124px); left: 15px; z-index: 2100; background: rgba(255,255,255,0.95); border: 1px solid var(--border); border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; backdrop-filter: blur(20px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); display: none; pointer-events: none; }
         .mode-chip.mode-view { color: #6e6e73; }
         .mode-chip.mode-add { color: var(--warn); }
@@ -29,14 +31,20 @@
         .btn-history { background: rgba(255,255,255,0.95); color: var(--text); border: 1px solid var(--border); border-radius: 16px; width: 44px; height: 44px; cursor: pointer; font-size: 18px; box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
         .btn-history:disabled { opacity: 0.45; cursor: default; }
         .workflow-hint { position: absolute; bottom: calc(106px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); width: min(90vw, 360px); z-index: 2100; background: rgba(0,0,0,0.75); color: #fff; border-radius: 16px; padding: 10px 14px; font-size: 13px; line-height: 1.4; display: none; text-align: center; backdrop-filter: blur(8px); }
-        .floating-save { position: absolute; right: 16px; bottom: calc(30px + env(safe-area-inset-bottom)); z-index: 2100; display: none; align-items: center; gap: 10px; }
+        .floating-save { position: absolute; right: 16px; bottom: calc(94px + env(safe-area-inset-bottom)); z-index: 2100; display: none; align-items: center; gap: 10px; }
         .floating-save-indicator { background: rgba(0,0,0,0.65); color: #fff; border-radius: 999px; padding: 7px 12px; font-size: 12px; font-weight: 700; white-space: nowrap; }
         .floating-save-indicator.clean { background: rgba(52,199,89,0.9); }
         .btn-save-floating { background: var(--btn); color: #fff; border: none; border-radius: 999px; height: 54px; padding: 0 18px; font-weight: 800; font-size: 15px; box-shadow: 0 10px 30px rgba(0,122,255,0.35); cursor: pointer; }
         .btn-save-floating:disabled { opacity: 0.65; cursor: default; }
         
-        .bottom-center-controls { position: absolute; bottom: calc(30px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 2000; display: none; flex-direction: column; align-items: center; width: auto; max-width: 90%; }
+        .bottom-center-controls { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 2000; display: none; flex-direction: column; align-items: center; width: auto; max-width: 90%; }
         .btn-add-main { background: var(--btn); color: #fff; padding: 18px 32px; border-radius: 35px; font-weight: 700; border: none; box-shadow: 0 10px 30px rgba(0,122,255,0.3); cursor: pointer; font-size: 16px; transition: 0.3s; width: max-content; white-space: nowrap; }
+        @media (max-width: 430px) {
+            .floating-save { right: 10px; bottom: calc(104px + env(safe-area-inset-bottom)); }
+            .floating-save-indicator { display: none; }
+            .btn-save-floating { height: 50px; padding: 0 14px; font-size: 14px; }
+            .btn-add-main { font-size: 14px; padding: 16px 22px; }
+        }
         .modal { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.3); display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(10px); }
         .modal-content { background: var(--bg-sec); width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; display: flex; flex-direction: column; max-height: 90vh; animation: slideUp 0.4s cubic-bezier(0.2, 1, 0.3, 1); position: relative; padding-bottom: env(safe-area-inset-bottom); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -160,7 +168,7 @@ const setActivePoint = (p, center = false) => {
     activePoint = p || null;
     points.forEach(pt => {
         const active = activePoint && pt === activePoint;
-        pt.line.options.set({ strokeWidth: active ? 8 : 5, strokeOpacity: active ? 1 : 0.8 });
+        pt.line.options.set({ strokeWidth: active ? 5 : 3, strokeOpacity: active ? 1 : 0.8 });
         pt.pm.options.set('zIndex', active ? 1800 : 1000);
         if (pt.pmEnd) pt.pmEnd.options.set('zIndex', active ? 1600 : 800);
     });
@@ -175,20 +183,20 @@ const applySnapshot = (snapshot) => {
     setActivePoint(null);
     updateSaveState();
 };
-const undoHistory = () => {
+function undoHistory() {
     if (historyIndex <= 0) return;
     historyIndex -= 1;
     applySnapshot(historyStack[historyIndex]);
     updateHistoryButtons();
     showToast('Действие отменено', 'info');
-};
-const redoHistory = () => {
+}
+function redoHistory() {
     if (historyIndex >= historyStack.length - 1) return;
     historyIndex += 1;
     applySnapshot(historyStack[historyIndex]);
     updateHistoryButtons();
     showToast('Действие повторено', 'info');
-};
+}
 const showHint = (text, hold = false) => {
     const hint = $('workflowHint');
     if (hintTimer) clearTimeout(hintTimer);
@@ -207,7 +215,12 @@ const updateModeUI = () => {
 };
 
 ymaps.ready(() => {
-    tg.expand(); if (tg.setHeaderColor) tg.setHeaderColor('secondary_bg_color');
+    tg.expand();
+    if (tg.requestFullscreen) {
+        try { tg.requestFullscreen(); } catch (e) {}
+    }
+    if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+    if (tg.setHeaderColor) tg.setHeaderColor('secondary_bg_color');
     $('userIdBadge').textContent = `ID: ${USER_ID}`;
     updateModeUI();
     map = new ymaps.Map("map", { center: [56.3399, 43.9332], zoom: 17, type: 'yandex#satellite', controls: [] });
@@ -255,6 +268,8 @@ const handleInitialAuth = async () => {
         $('bottomControls').style.display = 'flex'; 
         $('modeChip').style.display = 'block';
         $('historyControls').style.display = 'flex';
+        seedHistory();
+        updateSaveState();
         refreshFileList(); 
     } else {
         showToast("Ошибка авторизации. Проверьте токен.", 'error');
@@ -309,7 +324,7 @@ const initColorDropdown = (id, cb) => Object.entries(COLORS).forEach(([n, d]) =>
 const updateCommandOptions = (sel, col, val = "") => { sel.innerHTML = ''; (COMMAND_SETS[col] || ["Без команды"]).forEach(cmd => sel.appendChild(Object.assign(document.createElement('option'), { value: cmd, text: cmd, selected: cmd === val }))); };
 
 function addP(coords, data = null, silent = false) {
-    const p = { id: data?.id || (points.length + 1), color: data?.color || 'Gold', cmd: data?.cmd || '', comm: data?.comm || '', pts: data?.pts || [coords], pm: new ymaps.Placemark(coords, {}, { iconLayout: 'default#imageWithContent', iconImageSize: [40,40], iconImageOffset: [-20,-20], zIndex: 1000 }), line: new ymaps.Polyline(data?.pts || [coords], {}, { strokeWidth: 5, strokeOpacity: 0.8, zIndex: 500 }), pmEnd: null };
+    const p = { id: data?.id || (points.length + 1), color: data?.color || 'Gold', cmd: data?.cmd || '', comm: data?.comm || '', pts: data?.pts || [coords], pm: new ymaps.Placemark(coords, {}, { iconLayout: 'default#imageWithContent', iconImageSize: [40,40], iconImageOffset: [-20,-20], zIndex: 1000 }), line: new ymaps.Polyline(data?.pts || [coords], {}, { strokeWidth: 3, strokeOpacity: 0.8, zIndex: 500 }), pmEnd: null };
     p.line.options.set('strokeColor', COLORS[p.color].hex);
     p.pm.geometry.events.add('change', () => { const nc = p.pm.geometry.getCoordinates(), pts = p.line.geometry.getCoordinates(); if(pts.length) { pts[0] = nc; p.line.geometry.setCoordinates(pts); } });
     p.line.geometry.events.add('change', () => {
@@ -335,6 +350,7 @@ const startDrawingForPoint = (p, isNewPoint = false) => {
     isAdd = false;
     isDrawing = true;
     $('addText').textContent = "Рисуйте путь...";
+    $('addMarkerBtn').classList.remove('active');
     $('addMarkerBtn').classList.add('drawing');
     cur = p;
     setActivePoint(p, true);
@@ -365,6 +381,7 @@ function updPI(p) { const pts = p.line.geometry.getCoordinates(); if(!pts.length
 function recalculateIds() {
     points.forEach((p, i) => { p.id = i + 1; updI(p); if(p.pmEnd) updPI(p); });
     const list = $('pointsSortList'); if (list && list.children.length === points.length) Array.from(list.children).forEach((c, i) => { const n = c.querySelector('.point-number-text'); if(n) n.textContent = i + 1; c.dataset.id = i + 1; });
+    syncActiveListCard();
 }
 
 function createPointCard(p, single = false) {
@@ -375,37 +392,103 @@ function createPointCard(p, single = false) {
     
     // Автоматическая высота для комментария
     const autoHeight = () => { comm.style.height = 'auto'; comm.style.height = comm.scrollHeight + 'px'; };
-    comm.addEventListener('input', () => { p.comm = comm.value; autoHeight(); });
+    comm.addEventListener('input', () => { p.comm = comm.value; autoHeight(); updateSaveState(); });
+    comm.addEventListener('blur', () => { pushHistorySnapshot(); updateSaveState(); });
     setTimeout(autoHeight, 0);
 
     item.querySelector('.color-indicator-btn').onclick = e => { e.stopPropagation(); activeListPoint = { point: p, card: item }; toggleD('listColorDropdown'); };
-    sel.onchange = () => p.cmd = sel.value;
-    item.querySelector('.btn-del').onclick = () => { if(confirm("Удалить точку?")) { delPoint(p); if(single) toggleM('pointsOrderModal'); else openPointsOrderModal(); } };
-    item.querySelector('.btn-path').onclick = () => { toggleM('pointsOrderModal'); startEditPath(p); }; return item;
+    sel.onchange = () => { p.cmd = sel.value; pushHistorySnapshot(); updateSaveState(); };
+    item.onclick = e => {
+        if (e.target.closest('.btn-item-action') || e.target.closest('.color-indicator-btn') || e.target.closest('.cmd-select') || e.target.closest('.comm-input')) return;
+        setActivePoint(p, true);
+    };
+    item.querySelector('.btn-del').onclick = () => { if(confirm("Удалить точку?")) { pushHistorySnapshot(); delPoint(p); pushHistorySnapshot(); updateSaveState(); if(single) toggleM('pointsOrderModal'); else openPointsOrderModal(); showToast("Точка удалена", 'info'); } };
+    item.querySelector('.btn-path').onclick = () => { toggleM('pointsOrderModal'); startEditPath(p); };
+    return item;
 }
 
-function delPoint(p) { points = points.filter(x => x !== p); map.geoObjects.remove(p.pm); map.geoObjects.remove(p.line); if(p.pmEnd) map.geoObjects.remove(p.pmEnd); recalculateIds(); }
-function startEditPath(p) { cur = p; isDrawing = true; $('addText').textContent = "Рисуйте путь..."; $('addMarkerBtn').classList.add('drawing'); p.pm.options.set('draggable', true); p.line.editor.startEditing(); }
+function delPoint(p) {
+    points = points.filter(x => x !== p);
+    map.geoObjects.remove(p.pm);
+    map.geoObjects.remove(p.line);
+    if(p.pmEnd) map.geoObjects.remove(p.pmEnd);
+    if (activePoint === p) activePoint = null;
+    recalculateIds();
+    setActivePoint(points[0] || null);
+}
+function startEditPath(p) {
+    cur = p;
+    isDrawing = true;
+    $('addText').textContent = "Завершить рисование пути";
+    $('addMarkerBtn').classList.add('drawing');
+    p.pm.options.set('draggable', true);
+    p.line.editor.startEditing();
+    setActivePoint(p, true);
+    showHint('Редактируйте путь и нажмите "Завершить рисование пути".', true);
+    updateModeUI();
+}
 
 function openPointsOrderModal() {
     modalMode = 'list'; const list = $('pointsSortList'); list.innerHTML = ''; $('orderModalTitle').textContent = curFile ? curFile.replace('.json', '') : "Маршрут"; $('saveBtnText').textContent = "Сохранить в облаке";
-    if (!points.length) list.innerHTML = '<div style="text-align:center;padding:40px;color:#8e8e93;font-weight:500;">Маршрут пока пуст</div>'; else points.forEach(p => list.appendChild(createPointCard(p))); toggleM('pointsOrderModal');
+    if (!points.length) list.innerHTML = '<div style="text-align:center;padding:40px;color:#8e8e93;font-weight:500;">Маршрут пока пуст</div>'; else points.forEach(p => list.appendChild(createPointCard(p)));
+    syncActiveListCard();
+    toggleM('pointsOrderModal');
 }
 
-function openEditPointModal(p) { modalMode = 'edit'; $('pointsSortList').innerHTML = ''; $('orderModalTitle').textContent = `Точка #${p.id}`; $('saveBtnText').textContent = "Готово"; $('pointsSortList').appendChild(createPointCard(p, true)); toggleM('pointsOrderModal'); }
-function openCreatePointModal() { modalMode = 'create'; $('pointsSortList').innerHTML = ''; $('orderModalTitle').textContent = "Новая точка"; $('saveBtnText').textContent = "Поставить на карту"; tempNewPointData = { id: points.length + 1, color: 'Gold', cmd: COMMAND_SETS.Gold[0], comm: '' }; $('pointsSortList').appendChild(createPointCard(tempNewPointData, true)); toggleM('pointsOrderModal'); }
+function openEditPointModal(p) { modalMode = 'edit'; $('pointsSortList').innerHTML = ''; $('orderModalTitle').textContent = `Точка #${p.id}`; $('saveBtnText').textContent = "Готово"; $('pointsSortList').appendChild(createPointCard(p, true)); syncActiveListCard(); toggleM('pointsOrderModal'); }
+function openCreatePointModal() {
+    modalMode = 'create';
+    $('pointsSortList').innerHTML = '';
+    $('orderModalTitle').textContent = "Новая точка";
+    $('saveBtnText').textContent = "Поставить на карту";
+    tempNewPointData = { id: points.length + 1, color: 'Gold', cmd: COMMAND_SETS.Gold[0], comm: '' };
+    $('pointsSortList').appendChild(createPointCard(tempNewPointData, true));
+    toggleM('pointsOrderModal');
+}
 
 function handleModalSave() {
     if (modalMode === 'list') saveGist();
     else if (modalMode === 'edit') toggleM('pointsOrderModal');
-    else if (modalMode === 'create') { toggleM('pointsOrderModal'); isAdd = true; $('addMarkerBtn').classList.add('active'); $('addText').textContent = "Выберите место на карте"; map.setCursor('crosshair'); }
+    else if (modalMode === 'create') {
+        toggleM('pointsOrderModal');
+        isAdd = true;
+        $('addMarkerBtn').classList.add('active');
+        $('addText').textContent = "Выберите место на карте";
+        map.setCursor('crosshair');
+        showHint('Шаг 1/3: выберите место для новой точки на карте.', true);
+        updateModeUI();
+    }
 }
 
-function reorderPointsFromList() { points = Array.from($('pointsSortList').children).map(c => points.find(p => p.id === parseInt(c.dataset.id))).filter(p => !!p); recalculateIds(); }
+function reorderPointsFromList() {
+    pushHistorySnapshot();
+    points = Array.from($('pointsSortList').children).map(c => points.find(p => p.id === parseInt(c.dataset.id))).filter(p => !!p);
+    recalculateIds();
+    pushHistorySnapshot();
+    updateSaveState();
+}
 async function saveGist() {
-    if(!userGistId || !curFile) return; const btn = $('saveInListBtn'); btn.classList.add('loading');
+    if(!userGistId || !curFile) return;
+    const btn = $('saveInListBtn');
+    btn.classList.add('loading');
+    $('floatingSaveBtn').disabled = true;
+    showToast('Сохранение...', 'loading', 1200);
     const data = points.map(p => ({ id: p.id, color: p.color, pts: p.pts, cmd: p.cmd, comm: p.comm }));
-    if(await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: { content: JSON.stringify(data, null, 2) } } })) { btn.classList.remove('loading'); btn.classList.add('saved'); setTimeout(() => { btn.classList.remove('saved'); toggleM('pointsOrderModal'); }, 1000); }
+    if(await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [curFile]: { content: JSON.stringify(data, null, 2) } } })) {
+        lastSavedSnapshot = serializePoints();
+        updateSaveState();
+        btn.classList.remove('loading');
+        btn.classList.add('saved');
+        showToast('Сохранено в облако', 'success');
+        setTimeout(() => {
+            btn.classList.remove('saved');
+            if (modalMode === 'list') toggleM('pointsOrderModal');
+        }, 900);
+    } else {
+        btn.classList.remove('loading');
+        updateSaveState();
+        showToast('Ошибка сохранения. Проверьте сеть и токен.', 'error', 2800);
+    }
 }
 </script>
 </body>

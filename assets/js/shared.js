@@ -31,23 +31,35 @@
   function buildInitFileContent(extra = {}) {
     const tg = getTelegramWebApp();
     const initUnsafe = tg && tg.initDataUnsafe ? tg.initDataUnsafe : null;
-    const payload = {
-      generated_at: new Date().toISOString(),
-      page_url: global.location.href,
-      telegram: {
-        init_data_raw: tg ? tg.initData || null : null,
-        init_data_unsafe: initUnsafe,
-        chat_instance: initUnsafe ? initUnsafe.chat_instance || null : null,
-        chat_type: initUnsafe ? initUnsafe.chat_type || null : null,
-        start_param: initUnsafe ? initUnsafe.start_param || null : null,
-        query_id: initUnsafe ? initUnsafe.query_id || null : null,
-        auth_date: initUnsafe ? initUnsafe.auth_date || null : null,
-        user: initUnsafe ? initUnsafe.user || null : null,
-        receiver: initUnsafe ? initUnsafe.receiver || null : null
-      },
-      extra
-    };
-    return JSON.stringify(payload, null, 2);
+    const user = initUnsafe && initUnsafe.user ? initUnsafe.user : null;
+    const fullName = user
+      ? `${user.first_name || ''}${user.last_name ? ` ${user.last_name}` : ''}`.trim()
+      : 'Unknown';
+    const uname = user && user.username ? `@${user.username}` : '-';
+    const userId = user && user.id ? String(user.id) : '-';
+    const isPremium = user && typeof user.is_premium === 'boolean' ? user.is_premium : false;
+    const platform = tg && tg.platform ? tg.platform : '-';
+    const chatType = initUnsafe && initUnsafe.chat_type ? initUnsafe.chat_type : '-';
+    const chatInstance = initUnsafe && initUnsafe.chat_instance ? String(initUnsafe.chat_instance) : '-';
+    const createdAt = new Intl.DateTimeFormat('ru-RU', {
+      timeZone: 'Europe/Moscow',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).format(new Date());
+    return [
+      `👤 User: ${fullName} (${uname})`,
+      `🆔 ID: ${userId}`,
+      `⭐ Premium: ${isPremium ? 'yes' : 'no'}`,
+      `📱 Platform: ${platform}`,
+      `💬 Chat Type: ${chatType}`,
+      `🔗 Chat Instance: ${chatInstance}`,
+      `🕒 Created At (Moscow): ${createdAt}`
+    ].join('\n');
   }
 
   async function apiRequest(token, url, method = 'GET', body = null) {

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Route Navigator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=YANDEX_API_KEY&lang=ru_RU&suppressMapOpenBlock=true"></script>
+    <style>
+        :root { 
+            --bg: #f5f5f7; --btn: #007AFF; --btn-txt: #fff; --sheet-bg: rgba(255, 255, 255, 0.95); 
+            --dark-panel: rgba(40, 40, 40, 0.85); --text-main: #1d1d1f; --text-sub: #86868b; 
+            --accent: #007AFF; --border: rgba(255,255,255,0.1); --panel-blur: blur(20px); 
+            --twa-header-height: 44px;
+            --target-lime: #00FF00;
+        }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, sans-serif; overflow: hidden; background: #000; position: fixed; touch-action: none; }
+        #map { position: absolute; inset: 0; z-index: 1; touch-action: auto; }
+        [class*="-copyrights-pane"], [class*="-map-copyrights-promo"], [class*="-controls-pane"] { display: none !important; }
+        
+        /* UI Elements */
+        .top-ui-wrapper { position: absolute; top: 0; left: 0; right: 0; height: var(--twa-header-height); margin-top: env(safe-area-inset-top, 0px); display: flex; flex-direction: column; align-items: center; z-index: 9005; pointer-events: none; padding: 0 16px; gap: 4px; }
+        #routeHeaderBtn { pointer-events: auto; background: var(--dark-panel); backdrop-filter: var(--panel-blur); -webkit-backdrop-filter: var(--panel-blur); padding: 8px 20px; border-radius: 100px; border: 1px solid rgba(255,255,255,0.15); color: white; font-size: 14px; font-weight: 600; max-width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 8px 32px rgba(0,0,0,0.4); text-align: center; cursor: pointer; }
+        
+        /* Cache Progress Bar */
+        #cacheStatus { font-size: 9px; color: rgba(255,255,255,0.6); font-weight: 800; text-transform: uppercase; background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 4px; display: none; }
+
+        /* Overlays */
+        #gistInfoOverlay, #commentOverlay { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 320px; background: var(--dark-panel); backdrop-filter: var(--panel-blur); -webkit-backdrop-filter: var(--panel-blur); border-radius: 20px; border: 1px solid var(--border); padding: 16px; color: white; display: none; flex-direction: column; gap: 8px; z-index: 9025; box-shadow: 0 20px 40px rgba(0,0,0,0.5); pointer-events: auto; text-align: center; }
+        .overlay-title { font-size: 11px; font-weight: 800; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-bottom: 4px; }
+        .info-value { font-size: 14px; font-weight: 400; line-height: 1.4; }
+
+        #pointsMenu { position: absolute; background: var(--dark-panel); backdrop-filter: var(--panel-blur); -webkit-backdrop-filter: var(--panel-blur); border-radius: 24px; border: 1px solid rgba(255,255,255,0.15); display: none; flex-direction: column; z-index: 9010; box-shadow: 0 20px 40px rgba(0,0,0,0.5); pointer-events: auto; height: 75vh; bottom: 100px; left: 16px; right: 80px; width: auto; overflow: hidden; }
+
+        .menu-header { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: 800; font-size: 11px; text-align: center; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px; }
+        .scroll-list { overflow-y: auto; flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+        
+        .point-item { display: flex; align-items: flex-start; gap: 10px; padding: 12px; border-radius: 16px; color: white; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .point-item:active { background: rgba(255,255,255,0.08); }
+        .point-item.active { background: rgba(0,122,255,0.25); }
+        
+        .point-badge { min-width: 24px; height: 24px; border-radius: 8px; background: rgba(255,255,255,0.1); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; margin-top: 4px; }
+        .active .point-badge { background: var(--accent); }
+        
+        .point-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .point-name { font-size: 15px; font-weight: 600; line-height: 1.3; color: #fff; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; }
+        
+        .point-actions { display: flex; gap: 6px; align-items: center; }
+        .action-icon-btn { width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.12); border: none; cursor: pointer; flex-shrink: 0; }
+        .action-icon-btn svg { fill: #007AFF; width: 20px; height: 20px; }
+        .action-icon-btn.comm-btn svg { fill: #FF9500; }
+
+        .bottom-ui-wrapper { position: absolute; bottom: 30px; left: 16px; right: 16px; z-index: 9000; display: flex; align-items: flex-end; justify-content: flex-end; gap: 12px; pointer-events: none; }
+        #navHud, #selectionHud { flex: 1; background: rgba(0,0,0,0.85); backdrop-filter: var(--panel-blur); -webkit-backdrop-filter: var(--panel-blur); border-radius: 20px; padding: 16px; color: white; display: none; flex-direction: column; gap: 8px; border: 1px solid var(--border); pointer-events: auto; }
+        #navHud.active, #selectionHud.active { display: flex; }
+        .hud-header { display: flex; align-items: flex-start; gap: 10px; }
+        .hud-index { background: var(--accent); color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; }
+        .hud-cmd { font-size: 16px; font-weight: 700; flex: 1; }
+        
+        .hud-main-content { display: flex; align-items: center; gap: 10px; }
+        .hud-stats { display: flex; align-items: center; gap: 16px; flex: 1; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .hud-side-actions { display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); }
+        
+        .stat-label { font-size: 9px; color: #aaa; text-transform: uppercase; font-weight: 700; }
+        .stat-value { font-size: 14px; font-weight: 700; }
+        .stat-value.in-range { color: var(--target-lime); }
+
+        .hud-actions { width: 100%; display: flex; padding-top: 8px; gap: 10px; align-items: center; }
+        #selConfirmBtn { flex: 1; padding: 14px; border-radius: 12px; border: none; background: var(--btn); color: white; font-size: 15px; font-weight: 700; cursor: pointer; }
+
+        .control-stack { display: flex; flex-direction: column; gap: 12px; width: 56px; pointer-events: none; }
+        #telemetryPanel { background: rgba(0,0,0,0.8); backdrop-filter: var(--panel-blur); border-radius: 18px; padding: 10px 0; color: white; display: flex; flex-direction: column; align-items: center; border: 1px solid var(--border); pointer-events: auto; }
+        .tel-item { display: flex; flex-direction: column; align-items: center; }
+        .tel-label { font-size: 8px; color: #aaa; font-weight: 700; }
+        .tel-value { font-size: 15px; font-weight: 800; }
+        
+        #settingsOverlay { position: absolute; bottom: 0; right: 72px; z-index: 9010; background: var(--sheet-bg); border-radius: 20px; display: none; flex-direction: column; width: 220px; padding: 14px; gap: 12px; pointer-events: auto; color: #333; border: 1px solid rgba(0,0,0,0.15); }
+        .settings-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; }
+        .trigger-input { width: 54px; padding: 6px; border-radius: 10px; border: 1px solid rgba(0,0,0,0.1); text-align: center; }
+
+        .map-btn { pointer-events: auto; width: 56px; height: 56px; border-radius: 50%; background: rgba(0,0,0,.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; }
+        .map-btn svg { fill: white; width: 26px; }
+        .map-btn.active { background: var(--btn); }
+
+        .loading-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; transition: opacity 0.5s; font-weight: 600; text-align: center; padding: 20px; }
+        .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+        #errorMsg { color: #FF3B30; display: none; margin-top: 10px; font-size: 14px; }
+        #v { position: fixed; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+<div id="loading" class="loading-overlay">
+    <div id="loadingText">ПОЛУЧЕНИЕ ДАННЫХ...</div>
+    <div id="errorMsg">ОШИБКА: ПАРАМЕТР МАРШРУТА НЕ НАЙДЕН</div>
+</div>
+
+<video id="v" playsinline muted loop></video>
+<div id="map"></div>
+
+<div class="top-ui-wrapper">
+    <div id="routeHeaderBtn" onclick="toggleGistInfo();">Загрузка...</div>
+    <div id="cacheStatus">Офлайн-кэш: 0%</div>
+</div>
+
+<div id="gistInfoOverlay">
+    <div class="overlay-title">О маршруте</div>
+    <div id="gistDesc" class="info-value">Нет описания</div>
+</div>
+
+<div id="commentOverlay" onclick="this.style.display='none'">
+    <div class="overlay-title">Комментарий</div>
+    <div id="commentText" class="info-value">...</div>
+</div>
+
+<div id="pointsMenu">
+    <div class="menu-header">Список точек</div>
+    <div id="pointsList" class="scroll-list"></div>
+</div>
+
+<div class="bottom-ui-wrapper">
+    <div id="navHud">
+        <div class="hud-header">
+            <span class="hud-index" id="hudIndex">1</span>
+            <div class="hud-cmd" id="hudCmd">Маршрут не выбран</div>
+        </div>
+        <div class="hud-main-content">
+            <div class="hud-stats">
+                <div class="stat-item"><span class="stat-label">Дист</span><br><span class="stat-value" id="hudDist">---</span></div>
+                <div class="stat-item"><span class="stat-label">Цель АЗ</span><br><span class="stat-value" id="hudTargetAz">---</span></div>
+            </div>
+            <div class="hud-side-actions">
+                <button id="navCommentBtn" class="action-icon-btn comm-btn" style="display:none">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </button>
+                <button id="navSpeakBtn" class="action-icon-btn">
+                    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="selectionHud">
+        <div class="hud-header">
+            <span class="hud-index" id="selIndex">0</span>
+            <div class="hud-cmd" id="selCmd">Точка маршрута</div>
+        </div>
+        <div class="hud-actions">
+            <button id="selConfirmBtn">Выбрать</button>
+            <button id="selSpeakBtn" class="action-icon-btn">
+                <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+            </button>
+            <button id="selCommentBtn" class="action-icon-btn comm-btn" style="display:none">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="control-stack">
+        <div style="position: relative;">
+            <div id="telemetryPanel" onclick="toggleSettings(); event.stopPropagation();">
+                <div class="tel-item"><span class="tel-label">КМ/Ч</span><span class="tel-value" id="telSpeed">0</span></div>
+                <div style="height:1px; width:50%; background:rgba(255,255,255,0.1); margin:4px 0;"></div>
+                <div class="tel-item"><span class="tel-label">АЗ</span><span class="tel-value" id="telAz">0°</span></div>
+            </div>
+            <div id="settingsOverlay" onclick="event.stopPropagation()">
+                <div class="settings-row"><span>Триггер (м)</span><input type="number" class="trigger-input" id="cfgTrigger" value="25"></div>
+                <div class="settings-row"><span>Мин. скорость</span><input type="number" class="trigger-input" id="cfgSpeed" value="2"></div>
+                <div class="settings-row"><span>Азимут допуск</span><input type="number" class="trigger-input" id="cfgAz" value="45"></div>
+            </div>
+        </div>
+        <div id="listBtn" class="map-btn" onclick="togglePointsMenu();"><svg viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg></div>
+        <div id="locateBtn" class="map-btn" onclick="autoCenter=!autoCenter; this.classList.toggle('active', autoCenter); wake();"><svg viewBox="0 0 24 24"><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 7.48 7.94 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg></div>
+    </div>
+</div>
+
+<script>
+const CFG = { 
+    GITHUB_USER: "yvayvapyvapyva", 
+    CACHE_NAME: "route-audio-v1",
+    TRIGGER_DIST: 25, 
+    AZ_TOLERANCE: 45, 
+    SPEED_THRESHOLD: 2, 
+    DEFAULT_CENTER: [56.3268, 44.0059], 
+    COLORS: { Gold:'#FFD700', Blue:'#007AFF', Red:'#FF3B30', Lime:'#34C759', Fuchsia:'#AF52DE', Orange:'#FF9500', Purple:'#5856D6', Cyan:'#5AC8FA', Brown:'#A2845E', Grey:'#8E8E93' } 
+};
+
+const audioEngine = new Audio();
+document.getElementById('cfgTrigger').addEventListener('input', (e) => { CFG.TRIGGER_DIST = Number(e.target.value); });
+document.getElementById('cfgSpeed').addEventListener('input', (e) => { CFG.SPEED_THRESHOLD = Number(e.target.value); });
+document.getElementById('cfgAz').addEventListener('input', (e) => { CFG.AZ_TOLERANCE = Number(e.target.value); });
+
+let tgUser = null, startParam = null;
+
+if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+    tgUser = tg.initDataUnsafe?.user;
+    startParam = tg.initDataUnsafe?.start_param;
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+if (!startParam) startParam = urlParams.get('route') || urlParams.get('startapp');
+
+const v = document.getElementById('v');
+let wl = null, map, userMarker, pointsCollection, linesCollection, pointsData=[], currentIndex=-1, previewIndex=-1, autoCenter=false, lastPos=null, lastAz=0, currentSpeed=0, iconCache = new Map();
+
+const wake = async () => {
+    if (audioEngine.paused) {
+        audioEngine.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+        audioEngine.play().catch(() => {});
+    }
+    if (wl) { try { await wl.release(); } catch(e) {} wl = null; }
+    if ('wakeLock' in navigator) try { wl = await navigator.wakeLock.request('screen'); } catch(e) {}
+    if (!v.src) v.src = "data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21hdmMxbXA0MgAAAAhmcmVlAAAALm1kYXQAAAHvYXZjQwFQAFr/4AAZAWgAVv/AAB9AAAADAAIAAAMAHBDeEAEABWj/gAAAAA5ieHRyY3Rsc3RyYmMAAAALYm9vdnNoZHIAAAADbXZoZAAAAAAAAAAAAAAAAAAAA+gAAAPoAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACAGlzb21hdmMxbXA0MgAAAAhmcmVlAAAALm1kYXQ=";
+    v.play().catch(()=>{});
+};
+['touchstart', 'click'].forEach(e => document.addEventListener(e, wake));
+
+/**
+ * Нормализация имени файла: NFC, нижний регистр, удаление спецсимволов, замена пробелов на подчеркивание
+ */
+function getAudioPath(text) {
+    if (!text) return null;
+    const normalized = text.normalize('NFC')
+        .toLowerCase()
+        .replace(/[.,\/#!$%\^&\*;:{}=\-`~()]/g, "")
+        .trim()
+        .replace(/\s+/g, '_');
+    return `audio/${encodeURIComponent(normalized)}.mp3`;
+}
+
+/**
+ * Предзагрузка всех аудио в кэш браузера
+ */
+async function preloadAudio(data) {
+    if (!('caches' in window)) return;
+    const cache = await caches.open(CFG.CACHE_NAME);
+    const uniquePaths = [...new Set(data.map(p => getAudioPath(p.cmd)).filter(p => p))];
+    let loaded = 0;
+    
+    ui('cacheStatus').style.display = 'block';
+    ui('cacheStatus').innerText = `Кэширование: 0%`;
+
+    for (const path of uniquePaths) {
+        try {
+            const response = await fetch(path);
+            if (response.ok) {
+                await cache.put(path, response);
+            }
+        } catch (e) {
+            console.warn("Failed to cache:", path);
+        }
+        loaded++;
+        ui('cacheStatus').innerText = `Кэширование: ${Math.round((loaded / uniquePaths.length) * 100)}%`;
+    }
+    
+    setTimeout(() => {
+        ui('cacheStatus').innerText = "Готов к офлайну";
+        setTimeout(() => ui('cacheStatus').style.display = 'none', 3000);
+    }, 1000);
+}
+
+/**
+ * Воспроизведение команды (сначала проверяет кэш)
+ */
+async function playCommand(text) {
+    const path = getAudioPath(text);
+    if (!path) return;
+
+    audioEngine.pause();
+
+    // Пытаемся взять из кэша для мгновенного доступа
+    if ('caches' in window) {
+        const cache = await caches.open(CFG.CACHE_NAME);
+        const cachedResponse = await cache.match(path);
+        if (cachedResponse) {
+            const blob = await cachedResponse.blob();
+            audioEngine.src = URL.createObjectURL(blob);
+            audioEngine.play().catch(e => console.error("Cached play error", e));
+            return;
+        }
+    }
+
+    // Если в кэше нет, играем по сети
+    audioEngine.src = path;
+    audioEngine.play().catch((err) => console.warn("Network audio play failed:", path));
+}
+
+const ui = id => document.getElementById(id);
+const calcAz = (p1, p2) => {
+    if(!p1 || !p2) return 0;
+    const [la1, lo1] = p1.map(v => v * Math.PI/180), [la2, lo2] = p2.map(v => v * Math.PI/180);
+    const y = Math.sin(lo2-lo1) * Math.cos(la2), x = Math.cos(la1)*Math.sin(la2) - Math.sin(la1)*Math.cos(la2)*Math.cos(lo2-lo1);
+    return Math.round((Math.atan2(y, x) * 180 / Math.PI + 360) % 360);
+};
+
+const getIcon = (col, txt, az, isEnd, isCurr=false, hasComm=false) => {
+    const key = `${col}-${txt}-${az}-${isEnd}-${isCurr}-${hasComm}`;
+    if (iconCache.has(key)) return iconCache.get(key);
+    const s=isEnd?34:40, c=s/2, t=txt.replace('!','');
+    let strk = '#000000', strkWidth = 1.5;
+    
+    if (isCurr && !isEnd) { 
+        strk = '#00FF00'; 
+        strkWidth = 2.0; 
+    } else if (isEnd) { 
+        strk = '#FFFFFF'; 
+    }
+    
+    const textColor = hasComm ? '#FF9500' : '#000000';
+    
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${s}" height="${s}"><g transform="rotate(${az},${c},${c})"><polygon points="${c},2 ${c+10},${s-5} ${c},${s-14} ${c-10},${s-5}" fill="${col}" stroke="${strk}" stroke-width="${strkWidth}"/></g><circle cx="${c}" cy="${c}" r="${isEnd?7:9}" fill="${col}" stroke="${strk}" stroke-width="${strkWidth}"/><text x="${c}" y="${c+0.5}" font-size="${isEnd?8:9}" font-family="Arial" font-weight="900" text-anchor="middle" dominant-baseline="middle" fill="${textColor}" stroke="white" stroke-width="2" style="paint-order:stroke fill">${t}</text></svg>`;
+    const dataUrl = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+    iconCache.set(key, dataUrl);
+    return dataUrl;
+};
+
+ymaps.ready(() => {
+    map = new ymaps.Map("map", { center: CFG.DEFAULT_CENTER, zoom: 15, type: 'yandex#satellite', controls: [] });
+    pointsCollection = new ymaps.GeoObjectCollection();
+    linesCollection = new ymaps.GeoObjectCollection();
+    map.geoObjects.add(linesCollection).add(pointsCollection);
+    userMarker = new ymaps.Placemark(CFG.DEFAULT_CENTER, {}, { iconLayout:'default#image', iconImageSize:[40,40], iconImageOffset:[-20,-20], zIndex: 2000 });
+    map.geoObjects.add(userMarker);
+
+    navigator.geolocation.watchPosition(p => {
+        const c = [p.coords.latitude, p.coords.longitude];
+        currentSpeed = (p.coords.speed || 0)*3.6;
+        if(currentSpeed >= CFG.SPEED_THRESHOLD) lastAz = p.coords.heading ?? (lastPos ? calcAz(lastPos, c) : lastAz);
+        lastPos = c; userMarker.geometry.setCoordinates(c);
+        userMarker.options.set('iconImageHref', `data:image/svg+xml;base64,${btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><g transform="rotate(${lastAz},20,20)"><path d="M20,4 L32,34 L20,28 L8,34 Z" fill="#FF3B30" stroke="white" stroke-width="2"/></g></svg>`)}`);
+        ui('telSpeed').innerText = Math.round(currentSpeed); ui('telAz').innerText = `${Math.round(lastAz)}°`;
+        if(autoCenter) map.panTo(c);
+        checkNav();
+    }, null, {enableHighAccuracy:true});
+
+    map.events.add('click', () => { closeSelection(); togglePointsMenu(false); toggleSettings(false); toggleGistInfo(false); ui('commentOverlay').style.display = 'none'; });
+    
+    if (!startParam) {
+        showError("ПАРАМЕТР МАРШРУТА ОТСУТСТВУЕТ");
+    } else {
+        fetchSpecificRoute(startParam);
+    }
+});
+
+function showError(msg) {
+    ui('loadingText').style.display = 'none';
+    ui('errorMsg').style.display = 'block';
+    ui('errorMsg').innerText = msg;
+    ui('routeHeaderBtn').innerText = "ОШИБКА";
+}
+
+const closeSelection = () => { 
+    ui('selectionHud').classList.remove('active'); 
+    previewIndex = -1; 
+    if(currentIndex>=0) { ui('navHud').classList.add('active'); refreshMap(); }
+};
+
+async function fetchSpecificRoute(param) {
+    const parts = param.split('-');
+    if (parts.length < 2) {
+        showError("НЕВЕРНЫЙ ФОРМАТ ПАРАМЕТРА");
+        return;
+    }
+    const targetId = parts[0].trim();
+    const cleanFileName = parts[1].trim();
+    const targetFileName = cleanFileName + ".json";
+
+    ui('routeHeaderBtn').innerText = "ПОИСК GIST...";
+    try {
+        const res = await fetch(`https://api.github.com/users/${CFG.GITHUB_USER}/gists`), data = await res.json();
+        const targetGist = data.find(g => g.description && g.description.includes(targetId));
+        if (targetGist) {
+            const fileObj = Object.values(targetGist.files).find(f => f.filename.toLowerCase() === targetFileName.toLowerCase());
+            if (fileObj) {
+                ui('gistDesc').innerText = targetGist.description || "Описание отсутствует";
+                loadData(fileObj.raw_url, cleanFileName);
+            } else {
+                showError(`ФАЙЛ "${targetFileName}" НЕ НАЙДЕН`);
+            }
+        } else {
+            showError(`GIST "${targetId}" НЕ НАЙДЕН`);
+        }
+    } catch(e) { showError("ОШИБКА GITHUB"); }
+}
+
+async function loadData(url, name) {
+    iconCache.clear();
+    try {
+        const res = await fetch(url), raw = await res.json();
+        pointsData = raw.map((d, i) => {
+            const pts = d.pts || [];
+            return {
+                id: d.id, lat: pts[0]?.[0], lon: pts[0]?.[1], color: d.color, hex: CFG.COLORS[d.color] || '#007AFF',
+                cmd: (d.cmd || d.comm || `Т${d.id}`).trim(), 
+                comm: d.comm || "",
+                pts: pts, az: pts.length>=2 ? calcAz(pts[0], pts[1]) : 0
+            };
+        });
+        
+        // Запускаем предзагрузку аудио сразу после парсинга данных
+        preloadAudio(pointsData);
+
+        currentIndex = 0; previewIndex = -1; 
+        ui('routeHeaderBtn').innerText = name.toUpperCase();
+        refreshMap();
+        if(pointsData.length) {
+            const bounds = pointsCollection.getBounds();
+            if(bounds) map.setBounds(bounds, {zoomMargin:60});
+        }
+        ui('navHud').classList.add('active');
+        ui('loading').classList.add('hidden');
+    } catch(e) { showError("ОШИБКА ДАННЫХ"); }
+}
+
+function refreshMap() {
+    pointsCollection.removeAll(); linesCollection.removeAll();
+    if(currentIndex < 0 || currentIndex >= pointsData.length) return;
+    pointsData.forEach((p, i) => {
+        if(i < currentIndex) return; 
+        const isCurrent = (i === currentIndex), isPreview = (i === previewIndex);
+        const hasComm = p.comm && p.comm.trim() !== "";
+        const placemark = new ymaps.Placemark([p.lat, p.lon], {}, {
+            iconLayout: 'default#image',
+            iconImageHref: getIcon(p.hex, String(p.id), p.az, false, isCurrent, hasComm),
+            iconImageSize: [40, 40],
+            iconImageOffset: [-20, -20],
+            zIndex: (isCurrent || isPreview) ? 1000 : 500
+        });
+        placemark.events.add('click', e => {
+            if (i === currentIndex) return;
+            previewIndex = i;
+            ui('navHud').classList.remove('active'); 
+            ui('selectionHud').classList.add('active');
+            ui('selIndex').innerText = i + 1; 
+            ui('selCmd').innerText = p.cmd;
+            ui('selConfirmBtn').onclick = () => { setTarget(i); closeSelection(); };
+            ui('selSpeakBtn').onclick = (ev) => { ev.stopPropagation(); playCommand(p.cmd); };
+            if (hasComm) {
+                ui('selCommentBtn').style.display = 'flex';
+                ui('selCommentBtn').onclick = (ev) => { ev.stopPropagation(); showComment(p.comm, false); };
+            } else {
+                ui('selCommentBtn').style.display = 'none';
+            }
+            refreshMap();
+        });
+        pointsCollection.add(placemark);
+        if (isCurrent && p.pts && p.pts.length >= 2) drawPath(p, false, hasComm);
+        if (isPreview && p.pts && p.pts.length >= 2) drawPath(p, true, hasComm);
+    });
+    renderList(); updateHUD();
+}
+
+function showComment(txt, shouldCloseList = true) {
+    ui('commentText').innerText = txt;
+    ui('commentOverlay').style.display = 'flex';
+}
+
+function drawPath(p, isPreview, hasComm) {
+    const isCurrent = !isPreview;
+    const opacity = isPreview ? 0.6 : 1.0, width = isPreview ? 3 : 4, color = p.hex;
+    linesCollection.add(new ymaps.Polyline(p.pts, {}, {
+        strokeColor: color, strokeWidth: width, strokeOpacity: opacity, 
+        outline: true, outlineColor: '#000000', outlineWidth: 1.5
+    }));
+    const last = p.pts[p.pts.length-1], prev = p.pts[p.pts.length-2];
+    linesCollection.add(new ymaps.Placemark(last, {}, { 
+        iconLayout: 'default#image', iconImageSize: [34, 34], iconImageOffset: [-17, -17], 
+        iconImageHref: getIcon(p.hex, String(p.id), calcAz(prev, last), true, isCurrent, hasComm),
+        opacity: opacity, zIndex: isPreview ? 900 : 950
+    }));
+}
+
+function checkNav() {
+    if(currentIndex<0 || !lastPos || !pointsData[currentIndex]) return;
+    const t = pointsData[currentIndex], d = ymaps.coordSystem.geo.getDistance(lastPos, [t.lat, t.lon]);
+    let ad = Math.abs(lastAz - t.az) % 360; if(ad > 180) ad = 360 - ad;
+    updateHUD(d, ad);
+    if(d <= CFG.TRIGGER_DIST && ad <= CFG.AZ_TOLERANCE) { 
+        playCommand(t.cmd); 
+        currentIndex++; 
+        previewIndex = -1; 
+        if(currentIndex < pointsData.length) { refreshMap(); } else { ui('hudCmd').innerText = "ФИНИШ"; refreshMap(); }
+    }
+}
+
+function updateHUD(d, ad) {
+    const t = pointsData[currentIndex]; if(!t) return;
+    ui('hudIndex').innerText = currentIndex + 1; ui('hudCmd').innerText = t.cmd; ui('hudTargetAz').innerText = `${Math.round(t.az)}°`;
+    const hasComm = t.comm && t.comm.trim() !== "";
+    if (hasComm) {
+        ui('navCommentBtn').style.display = 'flex';
+        ui('navCommentBtn').onclick = (ev) => { ev.stopPropagation(); showComment(t.comm, false); };
+    } else {
+        ui('navCommentBtn').style.display = 'none';
+    }
+    ui('navSpeakBtn').onclick = (ev) => { ev.stopPropagation(); playCommand(t.cmd); };
+    if(d !== undefined) {
+        ui('hudDist').innerText = `${Math.round(d)}м`;
+        ui('hudDist').classList.toggle('in-range', d <= CFG.TRIGGER_DIST);
+        ui('hudTargetAz').classList.toggle('in-range', ad <= CFG.AZ_TOLERANCE);
+    }
+}
+
+function renderList() {
+    ui('pointsList').innerHTML = pointsData.map((p, i) => {
+        const hasComm = p.comm && p.comm.trim() !== "";
+        return `
+        <div class="point-item ${i===currentIndex?'active':''}" onclick="setTarget(${i});togglePointsMenu(false);">
+            <div class="point-badge" style="${i===currentIndex?'background:#00FF00;color:black':''}">${i+1}</div>
+            <div class="point-content">
+                <div class="point-name">${p.cmd}</div>
+            </div>
+            <div class="point-actions">
+                ${hasComm ? `
+                <button class="action-icon-btn comm-btn" onclick="event.stopPropagation(); showComment('${p.comm.replace(/'/g, "\\'")}', false);">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </button>` : ''}
+                <button class="action-icon-btn" onclick="event.stopPropagation(); playCommand('${p.cmd.replace(/'/g, "\\'")}');">
+                    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+const setTarget = idx => { currentIndex=idx; previewIndex=-1; refreshMap(); wake(); };
+const togglePointsMenu = s => { ui('pointsMenu').style.display = (s ?? ui('pointsMenu').style.display!=='flex') ? 'flex' : 'none'; if(ui('pointsMenu').style.display==='flex') { toggleSettings(false); toggleGistInfo(false); ui('commentOverlay').style.display = 'none'; } };
+const toggleSettings = s => { ui('settingsOverlay').style.display = (s ?? ui('settingsOverlay').style.display!=='flex') ? 'flex' : 'none'; if(ui('settingsOverlay').style.display==='flex') { togglePointsMenu(false); toggleGistInfo(false); ui('commentOverlay').style.display = 'none'; } };
+const toggleGistInfo = s => { ui('gistInfoOverlay').style.display = (s ?? ui('gistInfoOverlay').style.display!=='flex') ? 'flex' : 'none'; if(ui('gistInfoOverlay').style.display==='flex') { togglePointsMenu(false); toggleSettings(false); ui('commentOverlay').style.display = 'none'; } };
+</script>
+</body>
+</html>

@@ -32,6 +32,7 @@ const goHome = () => { const t = urlParams.get('t') || ''; window.location.href 
 
 const v = document.getElementById('v');
 let wl = null, map, userMarker, pointsCollection, linesCollection, pointsData=[], currentIndex=-1, previewIndex=-1, autoCenter=false, lastPos=null, lastAz=0, currentSpeed=0, iconCache = new Map();
+let wakeWanted = false;
 
 const wake = async () => {
     if (audioEngine.paused) {
@@ -39,11 +40,43 @@ const wake = async () => {
         audioEngine.play().catch(() => {});
     }
     if (wl) { try { await wl.release(); } catch(e) {} wl = null; }
-    if ('wakeLock' in navigator) try { wl = await navigator.wakeLock.request('screen'); } catch(e) {}
+    if ('wakeLock' in navigator) {
+        try {
+            wl = await navigator.wakeLock.request('screen');
+            wakeWanted = true;
+            hideWakeOverlay();
+        } catch(e) {
+            if (wakeWanted) showWakeOverlay();
+        }
+    } else if (wakeWanted) {
+        showWakeOverlay();
+    }
     if (!v.src) v.src = "data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21hdmMxbXA0MgAAAAhmcmVlAAAALm1kYXQAAAHvYXZjQwFQAFr/4AAZAWgAVv/AAB9AAAADAAIAAAMAHBDeEAEABWj/gAAAAA5ieHRyY3Rsc3RyYmMAAAALYm9vdnNoZHIAAAADbXZoZAAAAAAAAAAAAAAAAAAAA+gAAAPoAAAAAQAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAACAGlzb21hdmMxbXA0MgAAAAhmcmVlAAAALm1kYXQ=";
     v.play().catch(()=>{});
 };
-['touchstart', 'click'].forEach(e => document.addEventListener(e, wake));
+const wakeFromUser = () => {
+    wakeWanted = true;
+    wake();
+};
+['touchstart', 'click'].forEach(e => document.addEventListener(e, wakeFromUser));
+
+const wakeOverlay = document.getElementById('wakeOverlay');
+const wakeBtn = document.getElementById('wakeBtn');
+const showWakeOverlay = () => { if (wakeOverlay) wakeOverlay.style.display = 'flex'; };
+const hideWakeOverlay = () => { if (wakeOverlay) wakeOverlay.style.display = 'none'; };
+if (wakeBtn) wakeBtn.addEventListener('click', wakeFromUser);
+
+const tryRestoreWake = () => {
+    if (!wakeWanted) return;
+    wake();
+};
+
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) tryRestoreWake();
+});
+window.addEventListener('focus', () => {
+    tryRestoreWake();
+});
 
 /**
  * Нормализация имени файла: NFC, нижний регистр, удаление спецсимволов, замена пробелов на подчеркивание

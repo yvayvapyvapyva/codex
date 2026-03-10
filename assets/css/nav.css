@@ -78,3 +78,6 @@
         #errorMsg { color: #FF3B30; display: none; margin-top: 10px; font-size: 14px; }
         #v { position: fixed; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; }
         .nav-back-btn { top: calc(env(safe-area-inset-top, 0px) + 66px); left: 15px; z-index: 9012; }
+
+        .wake-overlay { position: fixed; inset: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; background: rgba(8,10,14,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .wake-btn { max-width: 90vw; padding: 18px 22px; border-radius: 18px; border: 1px solid var(--border); background: var(--dark-panel); color: var(--btn-txt); font-size: 16px; font-weight: 800; text-align: center; cursor: pointer; box-shadow: 0 16px 30px rgba(0,0,0,0.3); }

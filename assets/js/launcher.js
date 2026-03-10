@@ -22,6 +22,8 @@ const ui = {
   selectedRouteLabel: byId('selectedRouteLabel'),
   createNewBtn: byId('createNewBtn'),
   emptyCreateBtn: byId('emptyCreateBtn'),
+  routesTitle: byId('routesTitle'),
+  routesRow: byId('routesRow'),
   openActions: byId('openActions'),
   routeSettingsBtn: byId('routeSettingsBtn'),
   routeSettingsModal: byId('routeSettingsModal'),
@@ -319,9 +321,21 @@ async function init() {
     );
   }
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const startParam = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || urlParams.get('startapp');
   state.token = getTokenFromUrl();
   if (!state.token) {
-    ui.loading.textContent = 'ОШИБКА: НЕТ ПАРАМЕТРА t';
+    if (startParam) {
+      window.location.href = `nav.html?route=${encodeURIComponent(startParam)}`;
+      return;
+    }
+    hideLoading();
+    showRoutesScreen();
+    if (ui.routesTitle) ui.routesTitle.style.display = 'none';
+    if (ui.createNewBtn) ui.createNewBtn.style.display = 'none';
+    if (ui.routesRow) ui.routesRow.style.display = 'none';
+    if (ui.selectedRouteLabel) ui.selectedRouteLabel.style.display = 'none';
+    if (ui.openActions) ui.openActions.style.display = 'none';
     return;
   }
 

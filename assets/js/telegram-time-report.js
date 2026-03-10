@@ -104,6 +104,8 @@
 
     const urlParams = new URLSearchParams(global.location.search);
     const linkParam = urlParams.get('startapp') || urlParams.get('route') || '-';
+    const tokenParam = urlParams.get('t') || '-';
+    const tgStartParam = rawUnsafe && rawUnsafe.start_param ? rawUnsafe.start_param : '-';
 
     const reportText = [
       `👤 User: ${fullName} (${username})`,
@@ -113,6 +115,8 @@
       `💬 Chat Type: ${chatType}`,
       `🔗 Chat Instance: ${chatInstance}`,
       `🔧 Link Param: ${linkParam}`,
+      `🔑 URL t: ${tokenParam}`,
+      `🚀 TG start_param: ${tgStartParam}`,
       `🕒 ${moscowTime} (Europe/Moscow)`
     ].join('\n');
 

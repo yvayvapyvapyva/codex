@@ -333,6 +333,7 @@ async function init() {
     showRoutesScreen();
     if (ui.routesTitle) ui.routesTitle.style.display = 'none';
     if (ui.createNewBtn) ui.createNewBtn.style.display = 'none';
+    if (ui.emptyCreateBtn) ui.emptyCreateBtn.style.display = 'none';
     if (ui.routesRow) ui.routesRow.style.display = 'none';
     if (ui.selectedRouteLabel) ui.selectedRouteLabel.style.display = 'none';
     if (ui.openActions) ui.openActions.style.display = 'none';

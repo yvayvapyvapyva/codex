@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Каталог маршрутов</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link rel="stylesheet" href="assets/css/shared.css">
+  <style>
+    :root {
+      --catalog-bg: #0f1115;
+      --catalog-card: rgba(40, 44, 52, 0.55);
+      --catalog-border: rgba(255, 255, 255, 0.08);
+      --catalog-text: #e7e9ee;
+      --catalog-muted: #a9b0bf;
+      --catalog-btn: rgba(120, 128, 145, 0.35);
+      --catalog-btn-hover: rgba(160, 170, 190, 0.45);
+      --catalog-btn-border: rgba(255, 255, 255, 0.16);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: radial-gradient(1200px 700px at 10% 0%, #1a1f2a, #0f1115 55%, #0b0d12);
+      color: var(--catalog-text);
+      font-family: "SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .page {
+      min-height: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 28px 16px 40px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      width: min(720px, 100%);
+      background: var(--catalog-card);
+      border: 1px solid var(--catalog-border);
+      border-radius: 24px;
+      padding: 20px;
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle {
+      margin: 0 0 18px;
+      color: var(--catalog-muted);
+      font-size: 14px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 70vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .route-btn {
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--catalog-btn-border);
+      background: var(--catalog-btn);
+      color: var(--catalog-text);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .route-btn:hover {
+      background: var(--catalog-btn-hover);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .route-btn:active {
+      transform: translateY(0);
+      background: rgba(120, 128, 145, 0.5);
+    }
+
+    .hint {
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--catalog-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <h1>Каталог маршрутов</h1>
+      <div class="subtitle">Выберите маршрут для открытия в навигаторе</div>
+      <div id="routeList" class="list" aria-label="Список маршрутов"></div>
+      <div class="hint">Страница прокручивается, если маршрутов много.</div>
+    </div>
+  </div>
+
+  <script>
+    const routeCatalog = {
+      "7292595756-m_1": "Экзаменационный маршрут Мещера 1",
+      "7292595756-Razvoroty_perek_1": "Развороты на перекрестках Мещера ",
+      "7292595756-Ev_m1": "Э.В. Мещера 1",
+      "7292595756-Ev_k1": "Э.В. Кузнечиха 1"
+    };
+
+    const listEl = document.getElementById('routeList');
+
+    function getTokenParam() {
+      return new URLSearchParams(window.location.search).get('t');
+    }
+
+    function buildRouteUrl(routeKey) {
+      const token = getTokenParam();
+      const url = new URL('nav.html', window.location.href);
+      url.searchParams.set('route', routeKey);
+      if (token) url.searchParams.set('t', token);
+      return url.toString();
+    }
+
+    function renderRoutes() {
+      const entries = Object.entries(routeCatalog);
+      if (!entries.length) {
+        const empty = document.createElement('div');
+        empty.className = 'subtitle';
+        empty.textContent = 'Маршрутов нет.';
+        listEl.appendChild(empty);
+        return;
+      }
+
+      entries.forEach(([key, label]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'route-btn';
+        btn.textContent = label;
+        btn.onclick = () => {
+          window.location.href = buildRouteUrl(key);
+        };
+        listEl.appendChild(btn);
+      });
+    }
+
+    renderRoutes();
+  </script>
+</body>
+</html>

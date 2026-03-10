@@ -31,7 +31,7 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      padding: 28px 16px 40px;
+      padding: calc(env(safe-area-inset-top, 0px) + 76px) 16px calc(env(safe-area-inset-bottom, 0px) + 28px);
       box-sizing: border-box;
     }
 
@@ -100,6 +100,7 @@
   </style>
 </head>
 <body>
+  <button class="home-back-btn" onclick="goHome()" aria-label="На старт">←</button>
   <div class="page">
     <div class="card">
       <h1>Каталог маршрутов</h1>
@@ -129,6 +130,15 @@
       url.searchParams.set('route', routeKey);
       if (token) url.searchParams.set('t', token);
       return url.toString();
+    }
+
+    function goHome() {
+      const token = getTokenParam();
+      if (token) {
+        window.location.href = `index.html?t=${encodeURIComponent(token)}`;
+      } else {
+        window.location.href = 'index.html';
+      }
     }
 
     function renderRoutes() {

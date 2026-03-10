@@ -338,6 +338,7 @@ async function init() {
     if (ui.routesRow) ui.routesRow.style.display = 'none';
     if (ui.selectedRouteLabel) ui.selectedRouteLabel.style.display = 'none';
     if (ui.openActions) ui.openActions.style.display = 'none';
+    if (ui.emptyScreen) ui.emptyScreen.style.display = 'none';
     return;
   }
   if (!state.token) {

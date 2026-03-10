@@ -16,19 +16,27 @@
         <button class="btn btn-blue create-top-btn catalog-btn">Каталог публичных маршрутов</button>
         <h1 class="routes-title">Список ваших маршрутов</h1>
         <button id="createNewBtn" class="btn btn-green create-top-btn">Создать новый маршрут</button>
-        <select id="routesSelect" class="routes-select">
-            <option value="">Выберите маршрут</option>
-        </select>
+        <div class="routes-row">
+            <select id="routesSelect" class="routes-select routes-select-wide">
+                <option value="">Выберите маршрут</option>
+            </select>
+            <button id="routeSettingsBtn" class="route-settings-btn" aria-label="Настройки маршрута">⚙️</button>
+        </div>
         <div id="selectedRouteLabel" class="selected-route-label" style="display:none;"></div>
         <div id="openActions" class="actions" style="display:none;">
-            <div class="route-tools">
-                <button id="renameRouteBtn" class="tool-btn" aria-label="Переименовать">Переименовать</button>
-                <button id="copyLinkBtn" class="tool-btn" aria-label="Скопировать ссылку">Скопировать</button>
-                <button id="deleteRouteBtn" class="tool-btn tool-btn-danger" aria-label="Удалить маршрут">Удалить</button>
-            </div>
             <button id="openEditorBtn" class="btn btn-green">Открыть маршрут в редакторе</button>
             <button id="openNavigatorBtn" class="btn btn-green">Открыть маршрут в навигаторе</button>
         </div>
+    </div>
+</div>
+
+<div id="routeSettingsModal" class="modal-overlay" style="display:none;">
+    <div class="modal-sheet">
+        <div class="modal-title">Действия с маршрутом</div>
+        <button id="renameRouteBtn" class="modal-btn">Переименовать маршрут</button>
+        <button id="copyLinkBtn" class="modal-btn">Копировать ссылку на маршрут</button>
+        <button id="deleteRouteBtn" class="modal-btn modal-btn-danger">Удалить маршрут</button>
+        <button id="closeSettingsBtn" class="modal-btn modal-btn-muted">Закрыть</button>
     </div>
 </div>
 

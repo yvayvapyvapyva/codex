@@ -92,6 +92,11 @@ h1 {
   border-color: rgba(103, 255, 153, 0.45);
 }
 
+.btn-blue {
+  background: linear-gradient(180deg, rgba(61, 160, 255, 0.48), rgba(21, 110, 210, 0.36));
+  border-color: rgba(90, 180, 255, 0.5);
+}
+
 .btn-danger {
   background: linear-gradient(180deg, rgba(255, 95, 87, 0.42), rgba(190, 47, 40, 0.36));
   border-color: rgba(255, 127, 120, 0.5);

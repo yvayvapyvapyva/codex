@@ -248,6 +248,15 @@ function openNavigator() {
   window.location.href = `nav.html?route=${encodeURIComponent(navRoute)}&t=${encodeURIComponent(tokenParam)}`;
 }
 
+function openCatalog() {
+  const tokenParam = getTokenParam();
+  if (tokenParam) {
+    window.location.href = `katalog.html?t=${encodeURIComponent(tokenParam)}`;
+  } else {
+    window.location.href = 'katalog.html';
+  }
+}
+
 async function init() {
   const tg = getTelegramWebApp();
   if (tg) {
@@ -297,6 +306,9 @@ ui.openNavigatorBtn.onclick = openNavigator;
 ui.renameRouteBtn.onclick = renameRoute;
 ui.deleteRouteBtn.onclick = deleteRoute;
 ui.copyLinkBtn.onclick = copyRouteLink;
+document.querySelectorAll('.catalog-btn').forEach((btn) => {
+  btn.onclick = openCatalog;
+});
 ui.routesSelect.onchange = (e) => {
   state.selected = e.target.value || null;
   ui.openActions.style.display = state.selected ? 'block' : 'none';

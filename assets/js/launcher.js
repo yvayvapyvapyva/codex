@@ -343,15 +343,7 @@ async function init() {
       window.location.href = `nav.html?route=${encodeURIComponent(startParam)}`;
       return;
     }
-    hideLoading();
-    showRoutesScreen();
-    if (ui.routesTitle) ui.routesTitle.style.display = 'none';
-    forceHide(ui.createNewBtn);
-    forceHide(ui.emptyCreateBtn);
-    if (ui.routesRow) ui.routesRow.style.display = 'none';
-    if (ui.selectedRouteLabel) ui.selectedRouteLabel.style.display = 'none';
-    if (ui.openActions) ui.openActions.style.display = 'none';
-    if (ui.emptyScreen) ui.emptyScreen.style.display = 'none';
+    window.location.href = 'katalog.html';
     return;
   }
   if (!state.token) {

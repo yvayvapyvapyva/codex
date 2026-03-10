@@ -266,7 +266,16 @@ async function copyRouteLink() {
       copied = document.execCommand('copy');
       document.body.removeChild(ta);
     } catch (e2) {
-      copied = false;
+      padding: 0 20px;
+      padding: 16px 18px;
+      max-width: min(90vw, 720px);
+      max-height: 60vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 16px;
+      background: rgba(40,40,45,0.35);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+      white-space: pre-wrap;
     }
   }
   if (copied) notify('Ссылка скопирована в буфер обмена.');

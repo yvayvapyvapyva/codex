@@ -32,7 +32,7 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      padding: calc(env(safe-area-inset-top, 0px) + 148px) 16px calc(env(safe-area-inset-bottom, 0px) + 36px);
+      padding: calc(env(safe-area-inset-top, 0px) + 170px) 16px calc(env(safe-area-inset-bottom, 0px) + 90px);
       box-sizing: border-box;
     }
 
@@ -94,18 +94,25 @@
     }
 
     .catalog-back-btn {
-      top: calc(env(safe-area-inset-top, 0px) + 76px);
+      top: calc(env(safe-area-inset-top, 0px) + 96px);
     }
 
     .admin-btn {
       width: auto;
-      align-self: flex-start;
-      margin-top: 22px;
+      margin: 0;
       padding: 8px 12px;
       font-size: 13px;
       font-weight: 600;
       background: rgba(90, 150, 255, 0.35);
       border-color: rgba(120, 180, 255, 0.5);
+    }
+
+    .admin-fixed {
+      position: fixed;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+      transform: translateX(-50%);
+      z-index: 12000;
     }
   </style>
 </head>
@@ -116,9 +123,9 @@
       <h1>Каталог маршрутов</h1>
       <div class="subtitle">Выберите маршрут для открытия в навигаторе</div>
       <div id="routeList" class="list" aria-label="Список маршрутов"></div>
-      <button class="route-btn admin-btn" type="button" onclick="contactAdmin()">Связаться с администратором</button>
     </div>
   </div>
+  <button class="route-btn admin-btn admin-fixed" type="button" onclick="contactAdmin()">Связаться с администратором</button>
 
   <script>
     const routeCatalog = {

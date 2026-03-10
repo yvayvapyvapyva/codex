@@ -39,7 +39,8 @@ const ui = {
 };
 
 function getTokenParam() {
-  return new URLSearchParams(window.location.search).get('t') || '';
+  const params = new URLSearchParams(window.location.search);
+  return params.has('t') ? params.get('t') : null;
 }
 
 function notify(text) {
@@ -159,9 +160,12 @@ async function createRoute() {
     return;
   }
 
-  const tokenParam = getTokenParam();
   const routeName = fileName.replace('.json', '');
-  window.location.href = `editor.html?route=${encodeURIComponent(routeName)}&t=${encodeURIComponent(tokenParam)}`;
+  const tokenParam = getTokenParam();
+  const url = new URL('editor.html', window.location.href);
+  url.searchParams.set('route', routeName);
+  if (tokenParam) url.searchParams.set('t', tokenParam);
+  window.location.href = url.toString();
 }
 
 async function renameRoute() {
@@ -265,7 +269,10 @@ function openEditor() {
   if (!state.selected) return;
   const routeName = state.selected.replace('.json', '');
   const tokenParam = getTokenParam();
-  window.location.href = `editor.html?route=${encodeURIComponent(routeName)}&t=${encodeURIComponent(tokenParam)}`;
+  const url = new URL('editor.html', window.location.href);
+  url.searchParams.set('route', routeName);
+  if (tokenParam) url.searchParams.set('t', tokenParam);
+  window.location.href = url.toString();
 }
 
 function openNavigator() {
@@ -273,7 +280,10 @@ function openNavigator() {
   const routeName = state.selected.replace('.json', '');
   const tokenParam = getTokenParam();
   const navRoute = `${state.user.id}-${routeName}`;
-  window.location.href = `nav.html?route=${encodeURIComponent(navRoute)}&t=${encodeURIComponent(tokenParam)}`;
+  const url = new URL('nav.html', window.location.href);
+  url.searchParams.set('route', navRoute);
+  if (tokenParam) url.searchParams.set('t', tokenParam);
+  window.location.href = url.toString();
 }
 
 function openRouteSettings() {
@@ -289,11 +299,9 @@ function closeRouteSettings() {
 
 function openCatalog() {
   const tokenParam = getTokenParam();
-  if (tokenParam) {
-    window.location.href = `katalog.html?t=${encodeURIComponent(tokenParam)}`;
-  } else {
-    window.location.href = 'katalog.html';
-  }
+  const url = new URL('katalog.html', window.location.href);
+  if (tokenParam) url.searchParams.set('t', tokenParam);
+  window.location.href = url.toString();
 }
 
 function updateRouteSettingsButtons() {

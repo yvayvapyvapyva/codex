@@ -58,6 +58,11 @@ function hideAllScreens() {
   ui.createScreen.style.display = 'none';
 }
 
+function forceHide(el) {
+  if (!el) return;
+  el.style.setProperty('display', 'none', 'important');
+}
+
 function showRoutesScreen() {
   hideAllScreens();
   ui.routesScreen.style.display = 'flex';
@@ -341,8 +346,8 @@ async function init() {
     hideLoading();
     showRoutesScreen();
     if (ui.routesTitle) ui.routesTitle.style.display = 'none';
-    if (ui.createNewBtn) ui.createNewBtn.style.display = 'none';
-    if (ui.emptyCreateBtn) ui.emptyCreateBtn.style.display = 'none';
+    forceHide(ui.createNewBtn);
+    forceHide(ui.emptyCreateBtn);
     if (ui.routesRow) ui.routesRow.style.display = 'none';
     if (ui.selectedRouteLabel) ui.selectedRouteLabel.style.display = 'none';
     if (ui.openActions) ui.openActions.style.display = 'none';

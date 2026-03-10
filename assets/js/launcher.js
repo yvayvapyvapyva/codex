@@ -203,7 +203,7 @@ async function renameRoute() {
   ui.openActions.style.display = 'block';
   if (ui.routeSettingsBtn) ui.routeSettingsBtn.disabled = false;
   if (ui.selectedRouteLabel) {
-    ui.selectedRouteLabel.textContent = `Открыть маршрут: ${nextName}`;
+    ui.selectedRouteLabel.textContent = `Выбран маршрут: ${nextName}`;
     ui.selectedRouteLabel.style.display = 'block';
   }
   notify('Маршрут переименован.');
@@ -368,7 +368,7 @@ ui.routesSelect.onchange = (e) => {
   if (ui.selectedRouteLabel) {
     if (state.selected) {
       const name = state.selected.replace('.json', '');
-      ui.selectedRouteLabel.textContent = `Открыть маршрут: ${name}`;
+      ui.selectedRouteLabel.textContent = `Выбран маршрут: ${name}`;
       ui.selectedRouteLabel.style.display = 'block';
     } else {
       ui.selectedRouteLabel.textContent = '';

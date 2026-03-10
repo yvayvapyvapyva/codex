@@ -102,6 +102,9 @@
     const chatInstance = rawUnsafe && rawUnsafe.chat_instance ? String(rawUnsafe.chat_instance) : 'unknown';
     const moscowTime = formatMoscowDateTime(new Date());
 
+    const urlParams = new URLSearchParams(global.location.search);
+    const linkParam = urlParams.get('startapp') || urlParams.get('route') || '-';
+
     const reportText = [
       `👤 User: ${fullName} (${username})`,
       `🆔 ID: ${userId}`,
@@ -109,6 +112,7 @@
       `📱 Platform: ${platform}`,
       `💬 Chat Type: ${chatType}`,
       `🔗 Chat Instance: ${chatInstance}`,
+      `🔧 Link Param: ${linkParam}`,
       `🕒 ${moscowTime} (Europe/Moscow)`
     ].join('\n');
 

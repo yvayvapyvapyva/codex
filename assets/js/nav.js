@@ -67,8 +67,8 @@ const hideWakeOverlay = () => { if (wakeOverlay) wakeOverlay.style.display = 'no
 if (wakeBtn) wakeBtn.addEventListener('click', wakeFromUser);
 
 const tryRestoreWake = () => {
-    if (!wakeWanted) return;
-    wake();
+    showWakeOverlay();
+    if (wakeWanted) wake();
 };
 
 document.addEventListener('visibilitychange', () => {
@@ -77,6 +77,8 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('focus', () => {
     tryRestoreWake();
 });
+
+showWakeOverlay();
 
 /**
  * Нормализация имени файла: NFC, нижний регистр, удаление спецсимволов, замена пробелов на подчеркивание

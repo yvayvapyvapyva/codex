@@ -19,6 +19,7 @@ const ui = {
   emptyScreen: byId('emptyScreen'),
   createScreen: byId('createScreen'),
   routesSelect: byId('routesSelect'),
+  selectedRouteLabel: byId('selectedRouteLabel'),
   createNewBtn: byId('createNewBtn'),
   emptyCreateBtn: byId('emptyCreateBtn'),
   openActions: byId('openActions'),
@@ -111,6 +112,10 @@ function renderRoutes() {
   ui.routesSelect.innerHTML = '<option value="">Выберите маршрут</option>';
   state.selected = null;
   ui.openActions.style.display = 'none';
+  if (ui.selectedRouteLabel) {
+    ui.selectedRouteLabel.style.display = 'none';
+    ui.selectedRouteLabel.textContent = '';
+  }
 
   if (!state.routes.length) {
     return;
@@ -322,6 +327,16 @@ document.querySelectorAll('.catalog-btn').forEach((btn) => {
 ui.routesSelect.onchange = (e) => {
   state.selected = e.target.value || null;
   ui.openActions.style.display = state.selected ? 'block' : 'none';
+  if (ui.selectedRouteLabel) {
+    if (state.selected) {
+      const name = state.selected.replace('.json', '');
+      ui.selectedRouteLabel.textContent = `Выбран маршрут \"${name}\"`;
+      ui.selectedRouteLabel.style.display = 'block';
+    } else {
+      ui.selectedRouteLabel.textContent = '';
+      ui.selectedRouteLabel.style.display = 'none';
+    }
+  }
 };
 
 init();

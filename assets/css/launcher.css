@@ -138,9 +138,10 @@ h1 {
   font-weight: 600;
   min-height: 48px;
   padding: 12px 10px;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
+  white-space: normal;
+  text-overflow: clip;
+  overflow: visible;
+  line-height: 1.2;
   cursor: pointer;
 }
 
@@ -151,6 +152,14 @@ h1 {
 
 .actions {
   margin-top: 8px;
+}
+
+.selected-route-label {
+  width: 100%;
+  margin: 6px 0 8px;
+  font-size: 13px;
+  color: #c7c9d1;
+  text-align: center;
 }
 
 .input {

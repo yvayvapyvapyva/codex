@@ -92,9 +92,12 @@ h1 {
 .routes-select-wide {
   margin-bottom: 0;
   flex: 1;
+  min-width: 0;
+  width: auto;
 }
 
 .route-settings-btn {
+  flex: 0 0 auto;
   width: 44px;
   height: 44px;
   border-radius: 14px;

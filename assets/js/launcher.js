@@ -28,7 +28,8 @@ const ui = {
   deleteRouteBtn: byId('deleteRouteBtn'),
   copyLinkBtn: byId('copyLinkBtn'),
   routeNameInput: byId('routeNameInput'),
-  confirmCreateBtn: byId('confirmCreateBtn')
+  confirmCreateBtn: byId('confirmCreateBtn'),
+  backFromCreateBtn: byId('backFromCreateBtn')
 };
 
 function getTokenParam() {
@@ -65,6 +66,14 @@ function showCreateScreen() {
   ui.createScreen.style.display = 'flex';
   ui.routeNameInput.value = '';
   ui.routeNameInput.focus();
+}
+
+function backFromCreate() {
+  if (state.routes.length) {
+    showRoutesScreen();
+  } else {
+    showEmptyScreen();
+  }
 }
 
 function hideLoading() {
@@ -301,6 +310,7 @@ async function init() {
 ui.createNewBtn.onclick = showCreateScreen;
 ui.emptyCreateBtn.onclick = showCreateScreen;
 ui.confirmCreateBtn.onclick = createRoute;
+ui.backFromCreateBtn.onclick = backFromCreate;
 ui.openEditorBtn.onclick = openEditor;
 ui.openNavigatorBtn.onclick = openNavigator;
 ui.renameRouteBtn.onclick = renameRoute;

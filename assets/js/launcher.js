@@ -28,6 +28,10 @@ const ui = {
   routeSettingsBtn: byId('routeSettingsBtn'),
   routeSettingsModal: byId('routeSettingsModal'),
   closeSettingsBtn: byId('closeSettingsBtn'),
+  instructionBtn: byId('instructionBtn'),
+  instructionModal: byId('instructionModal'),
+  instructionText: byId('instructionText'),
+  instructionCloseBtn: byId('instructionCloseBtn'),
   openEditorBtn: byId('openEditorBtn'),
   openNavigatorBtn: byId('openNavigatorBtn'),
   renameRouteBtn: byId('renameRouteBtn'),
@@ -316,6 +320,19 @@ function updateRouteSettingsButtons() {
   if (ui.deleteRouteBtn) ui.deleteRouteBtn.disabled = !hasSelection;
 }
 
+const INSTRUCTION_TEXT = 'читай внимательно';
+
+function openInstruction() {
+  if (!ui.instructionModal || !ui.instructionText) return;
+  ui.instructionText.textContent = INSTRUCTION_TEXT;
+  ui.instructionModal.style.display = 'flex';
+}
+
+function closeInstruction() {
+  if (!ui.instructionModal) return;
+  ui.instructionModal.style.display = 'none';
+}
+
 async function init() {
   const tg = getTelegramWebApp();
   if (tg) {
@@ -384,6 +401,13 @@ if (ui.routeSettingsModal) {
   };
 }
 if (ui.closeSettingsBtn) ui.closeSettingsBtn.onclick = closeRouteSettings;
+if (ui.instructionBtn) ui.instructionBtn.onclick = openInstruction;
+if (ui.instructionCloseBtn) ui.instructionCloseBtn.onclick = closeInstruction;
+if (ui.instructionModal) {
+  ui.instructionModal.onclick = (e) => {
+    if (e.target === ui.instructionModal) closeInstruction();
+  };
+}
 document.querySelectorAll('.catalog-btn').forEach((btn) => {
   btn.onclick = openCatalog;
 });

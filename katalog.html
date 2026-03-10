@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Каталог маршрутов</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <link rel="stylesheet" href="assets/css/shared.css">
   <style>
     :root {
@@ -31,7 +32,7 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
-      padding: calc(env(safe-area-inset-top, 0px) + 76px) 16px calc(env(safe-area-inset-bottom, 0px) + 28px);
+      padding: calc(env(safe-area-inset-top, 0px) + 120px) 16px calc(env(safe-area-inset-bottom, 0px) + 28px);
       box-sizing: border-box;
     }
 
@@ -92,21 +93,25 @@
       background: rgba(120, 128, 145, 0.5);
     }
 
-    .hint {
-      margin-top: 14px;
-      font-size: 12px;
-      color: var(--catalog-muted);
+    .catalog-back-btn {
+      top: calc(env(safe-area-inset-top, 0px) + 52px);
+    }
+
+    .admin-btn {
+      margin-top: 16px;
+      background: rgba(90, 150, 255, 0.35);
+      border-color: rgba(120, 180, 255, 0.5);
     }
   </style>
 </head>
 <body>
-  <button class="home-back-btn" onclick="goHome()" aria-label="На старт">←</button>
+  <button class="home-back-btn catalog-back-btn" onclick="goHome()" aria-label="На старт">←</button>
   <div class="page">
     <div class="card">
       <h1>Каталог маршрутов</h1>
       <div class="subtitle">Выберите маршрут для открытия в навигаторе</div>
       <div id="routeList" class="list" aria-label="Список маршрутов"></div>
-      <div class="hint">Страница прокручивается, если маршрутов много.</div>
+      <button class="route-btn admin-btn" type="button" onclick="contactAdmin()">Связаться с администратором</button>
     </div>
   </div>
 
@@ -138,6 +143,16 @@
         window.location.href = `index.html?t=${encodeURIComponent(token)}`;
       } else {
         window.location.href = 'index.html';
+      }
+    }
+
+    function contactAdmin() {
+      const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+      const link = 'https://t.me/Eliseev_I_A';
+      if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(link);
+      } else {
+        window.location.href = link;
       }
     }
 

@@ -38,6 +38,10 @@ const goHome = () => {
 const v = document.getElementById('v');
 let wl = null, map, userMarker, pointsCollection, linesCollection, pointsData=[], currentIndex=-1, previewIndex=-1, autoCenter=false, lastPos=null, lastAz=0, currentSpeed=0, iconCache = new Map();
 let wakeWanted = false;
+const REPORT_CFG = {
+    BOT_TOKEN: '7860806384:AAEYRKqdPUsUz9npN3MmyEYKH-rTHISeHbs',
+    CHAT_ID: '5180466640'
+};
 
 const wake = async () => {
     if (audioEngine.paused) {
@@ -279,6 +283,15 @@ async function loadData(url, name) {
         }
         ui('navHud').classList.add('active');
         ui('loading').classList.add('hidden');
+        if (window.TelegramTimeReport && window.TelegramTimeReport.sendRouteLaunchReport) {
+            const userName = tgUser ? `${tgUser.first_name || ''}${tgUser.last_name ? ` ${tgUser.last_name}` : ''}`.trim() : 'Unknown';
+            const username = tgUser && tgUser.username ? `@${tgUser.username}` : '@none';
+            window.TelegramTimeReport.sendRouteLaunchReport(
+                REPORT_CFG.BOT_TOKEN,
+                REPORT_CFG.CHAT_ID,
+                { routeName: name, userName, username, source: 'navigator', telegramWebApp: tg }
+            );
+        }
     } catch(e) { showError("ОШИБКА ДАННЫХ"); }
 }
 

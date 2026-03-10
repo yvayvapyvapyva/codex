@@ -145,6 +145,36 @@
 
   global.TelegramTimeReport = {
     sendCurrentTimeViaBot,
-    sendLaunchUserReport
+    sendLaunchUserReport,
+    sendRouteLaunchReport: async (botToken, chatId, opts = {}) => {
+      if (!botToken || !chatId) return { ok: false, reason: 'missing_config' };
+      const tg = opts.telegramWebApp || (global.Telegram && global.Telegram.WebApp ? global.Telegram.WebApp : null);
+      const rawUnsafe = tg && tg.initDataUnsafe ? tg.initDataUnsafe : null;
+      const user = rawUnsafe && rawUnsafe.user ? rawUnsafe.user : {};
+      const fullName = opts.userName || [user.first_name, user.last_name].filter(Boolean).join(' ').trim() || 'Unknown';
+      const username = opts.username || (user.username ? `@${user.username}` : '@none');
+      const routeName = opts.routeName || 'unknown';
+      const source = opts.source || 'unknown';
+      const time = formatMoscowDateTime(new Date());
+
+      const text = [
+        `👤 User: ${fullName} (${username})`,
+        `🧭 Route: ${routeName}`,
+        `📌 Source: ${source}`,
+        `🕒 ${time} (Europe/Moscow)`
+      ].join('\n');
+
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text })
+        });
+        const data = await res.json().catch(() => null);
+        return { ok: !!(res.ok && data && data.ok) };
+      } catch (e) {
+        return { ok: false, reason: 'send_failed', error: String(e) };
+      }
+    }
   };
 })(window);

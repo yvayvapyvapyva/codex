@@ -201,6 +201,11 @@ h1 {
   cursor: pointer;
 }
 
+.modal-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .modal-btn-danger {
   background: linear-gradient(180deg, rgba(255, 95, 87, 0.42), rgba(190, 47, 40, 0.36));
   border-color: rgba(255, 127, 120, 0.5);

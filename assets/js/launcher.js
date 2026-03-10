@@ -23,6 +23,9 @@ const ui = {
   createNewBtn: byId('createNewBtn'),
   emptyCreateBtn: byId('emptyCreateBtn'),
   openActions: byId('openActions'),
+  routeSettingsBtn: byId('routeSettingsBtn'),
+  routeSettingsModal: byId('routeSettingsModal'),
+  closeSettingsBtn: byId('closeSettingsBtn'),
   openEditorBtn: byId('openEditorBtn'),
   openNavigatorBtn: byId('openNavigatorBtn'),
   renameRouteBtn: byId('renameRouteBtn'),
@@ -116,6 +119,7 @@ function renderRoutes() {
     ui.selectedRouteLabel.style.display = 'none';
     ui.selectedRouteLabel.textContent = '';
   }
+  updateRouteSettingsButtons();
 
   if (!state.routes.length) {
     return;
@@ -197,7 +201,13 @@ async function renameRoute() {
   state.selected = nextFile;
   ui.routesSelect.value = nextFile;
   ui.openActions.style.display = 'block';
+  if (ui.routeSettingsBtn) ui.routeSettingsBtn.disabled = false;
+  if (ui.selectedRouteLabel) {
+    ui.selectedRouteLabel.textContent = `Открыть маршрут: ${nextName}`;
+    ui.selectedRouteLabel.style.display = 'block';
+  }
   notify('Маршрут переименован.');
+  closeRouteSettings();
 }
 
 async function deleteRoute() {
@@ -221,6 +231,7 @@ async function deleteRoute() {
   renderRoutes();
   showRoutesScreen();
   notify('Маршрут удалён.');
+  closeRouteSettings();
 }
 
 async function copyRouteLink() {
@@ -245,6 +256,7 @@ async function copyRouteLink() {
   }
   if (copied) notify('Ссылка скопирована в буфер обмена.');
   else prompt('Скопируйте ссылку вручную:', link);
+  closeRouteSettings();
 }
 
 function openEditor() {
@@ -262,6 +274,17 @@ function openNavigator() {
   window.location.href = `nav.html?route=${encodeURIComponent(navRoute)}&t=${encodeURIComponent(tokenParam)}`;
 }
 
+function openRouteSettings() {
+  if (!ui.routeSettingsModal) return;
+  updateRouteSettingsButtons();
+  ui.routeSettingsModal.style.display = 'flex';
+}
+
+function closeRouteSettings() {
+  if (!ui.routeSettingsModal) return;
+  ui.routeSettingsModal.style.display = 'none';
+}
+
 function openCatalog() {
   const tokenParam = getTokenParam();
   if (tokenParam) {
@@ -269,6 +292,13 @@ function openCatalog() {
   } else {
     window.location.href = 'katalog.html';
   }
+}
+
+function updateRouteSettingsButtons() {
+  const hasSelection = !!state.selected;
+  if (ui.renameRouteBtn) ui.renameRouteBtn.disabled = !hasSelection;
+  if (ui.copyLinkBtn) ui.copyLinkBtn.disabled = !hasSelection;
+  if (ui.deleteRouteBtn) ui.deleteRouteBtn.disabled = !hasSelection;
 }
 
 async function init() {
@@ -321,16 +351,24 @@ ui.openNavigatorBtn.onclick = openNavigator;
 ui.renameRouteBtn.onclick = renameRoute;
 ui.deleteRouteBtn.onclick = deleteRoute;
 ui.copyLinkBtn.onclick = copyRouteLink;
+if (ui.routeSettingsBtn) ui.routeSettingsBtn.onclick = openRouteSettings;
+if (ui.routeSettingsModal) {
+  ui.routeSettingsModal.onclick = (e) => {
+    if (e.target === ui.routeSettingsModal) closeRouteSettings();
+  };
+}
+if (ui.closeSettingsBtn) ui.closeSettingsBtn.onclick = closeRouteSettings;
 document.querySelectorAll('.catalog-btn').forEach((btn) => {
   btn.onclick = openCatalog;
 });
 ui.routesSelect.onchange = (e) => {
   state.selected = e.target.value || null;
   ui.openActions.style.display = state.selected ? 'block' : 'none';
+  updateRouteSettingsButtons();
   if (ui.selectedRouteLabel) {
     if (state.selected) {
       const name = state.selected.replace('.json', '');
-      ui.selectedRouteLabel.textContent = `Выбран маршрут \"${name}\"`;
+      ui.selectedRouteLabel.textContent = `Открыть маршрут: ${name}`;
       ui.selectedRouteLabel.style.display = 'block';
     } else {
       ui.selectedRouteLabel.textContent = '';

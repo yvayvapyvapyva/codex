@@ -363,6 +363,7 @@ async function init() {
     window.location.href = 'katalog.html';
     return;
   }
+  if (ui.instructionBtn) ui.instructionBtn.style.display = 'block';
   if (!state.token) {
     ui.loading.textContent = 'ОШИБКА: НЕКОРРЕКТНЫЙ ПАРАМЕТР t';
     return;

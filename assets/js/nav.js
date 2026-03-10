@@ -227,13 +227,13 @@ async function fetchSpecificRoute(param) {
         return;
     }
     const targetId = parts[0].trim();
-    const cleanFileName = parts[1].trim();
+    const cleanFileName = parts.slice(1).join('-').trim();
     const targetFileName = cleanFileName + ".json";
 
     ui('routeHeaderBtn').innerText = "ПОИСК GIST...";
     try {
         const res = await fetch(`https://api.github.com/users/${CFG.GITHUB_USER}/gists`), data = await res.json();
-        const targetGist = data.find(g => g.description && g.description.includes(targetId));
+        const targetGist = data.find(g => g.description && g.description.includes(`[${targetId}]`));
         if (targetGist) {
             const fileObj = Object.values(targetGist.files).find(f => f.filename.toLowerCase() === targetFileName.toLowerCase());
             if (fileObj) {

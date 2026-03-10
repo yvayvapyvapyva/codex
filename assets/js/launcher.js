@@ -323,8 +323,9 @@ async function init() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const startParam = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || urlParams.get('startapp');
+  const hasTParam = urlParams.has('t');
   state.token = getTokenFromUrl();
-  if (!state.token) {
+  if (!hasTParam) {
     if (startParam) {
       window.location.href = `nav.html?route=${encodeURIComponent(startParam)}`;
       return;
@@ -337,6 +338,10 @@ async function init() {
     if (ui.routesRow) ui.routesRow.style.display = 'none';
     if (ui.selectedRouteLabel) ui.selectedRouteLabel.style.display = 'none';
     if (ui.openActions) ui.openActions.style.display = 'none';
+    return;
+  }
+  if (!state.token) {
+    ui.loading.textContent = 'ОШИБКА: НЕКОРРЕКТНЫЙ ПАРАМЕТР t';
     return;
   }
 

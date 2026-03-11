@@ -241,7 +241,7 @@ async function fetchSpecificRoute(param) {
 
     ui('routeHeaderBtn').innerText = "ПОИСК GIST...";
     try {
-        const res = await fetch(`https://api.github.com/users/${CFG.GITHUB_USER}/gists`), data = await res.json();
+        const res = await fetch(`https://api.github.com/users/${CFG.GITHUB_USER}/gists?per_page=100`), data = await res.json();
         const targetGist = data.find(g => g.description && g.description.includes(`[${targetId}]`));
         if (targetGist) {
             const fileObj = Object.values(targetGist.files).find(f => f.filename.toLowerCase() === targetFileName.toLowerCase());

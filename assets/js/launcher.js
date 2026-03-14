@@ -128,6 +128,7 @@ async function ensureUserGist() {
 }
 
 async function fetchRoutes() {
+  if (!state.gistId) return [];
   const gist = await apiRequest(state.token, `https://api.github.com/gists/${state.gistId}?t=${Date.now()}`);
   if (!gist) return [];
   return Object.keys(gist.files || {})
@@ -164,6 +165,14 @@ async function createRoute() {
     notify('Введите название маршрута.');
     return;
   }
+  
+  // Ensure user gist exists before creating a route
+  const gistOk = await ensureUserGist();
+  if (!gistOk) {
+    notify('Ошибка подключения к GitHub.');
+    return;
+  }
+  
   const fileName = `${name}.json`;
 
   const exists = state.routes.includes(fileName);
@@ -384,12 +393,6 @@ async function init() {
   if (ui.instructionBtn) ui.instructionBtn.style.display = 'block';
   if (!state.token) {
     ui.loading.textContent = 'ОШИБКА: НЕКОРРЕКТНЫЙ ПАРАМЕТР t';
-    return;
-  }
-
-  const gistOk = await ensureUserGist();
-  if (!gistOk) {
-    ui.loading.textContent = 'ОШИБКА ПОДКЛЮЧЕНИЯ К GITHUB';
     return;
   }
 

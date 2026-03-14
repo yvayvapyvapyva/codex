@@ -138,9 +138,12 @@ const getRouteFromUrl = () => {
 };
 const getTokenParam = () => new URLSearchParams(window.location.search).get('t') || '';
 const goHome = () => { const t = getTokenParam(); window.location.href = `index.html?t=${encodeURIComponent(t)}`; };
-const handleInitialAuth = async () => { 
-    if(await ensureUserGist()) { 
-        $('welcomeScreen').style.display = 'none'; 
+const handleInitialAuth = async () => {
+    // Ищем существующий гист, но не создаём новый
+    userGistId = await findUserGist();
+    
+    if(userGistId) {
+        $('welcomeScreen').style.display = 'none';
         seedHistory();
         updateSaveState();
         $('uiControls').style.display = 'flex';
@@ -160,9 +163,32 @@ const handleInitialAuth = async () => {
         }
         showToast("Вход выполнен", 'success');
     } else {
-        showToast("Ошибка авторизации. Проверьте токен.", 'error');
+        // Гиста нет - показываем приветственный экран, гист будет создан при создании маршрута
+        $('welcomeScreen').style.display = 'none';
+        seedHistory();
+        updateSaveState();
+        $('uiControls').style.display = 'flex';
+        $('bottomControls').style.display = 'flex';
+        showToast("Создайте первый маршрут в настройках", 'info');
+        openSettingsModal();
     }
 };
+const findUserGist = async () => {
+    let allGists = [];
+    let page = 1;
+    const perPage = 100;
+    while (true) {
+        const gists = await api(`https://api.github.com/gists?per_page=${perPage}&page=${page}&t=${Date.now()}`);
+        if(!gists || gists.length === 0) break;
+        allGists = allGists.concat(gists);
+        if (gists.length < perPage) break;
+        page++;
+    }
+    if(!allGists) return null;
+    const ex = allGists.find(g => g.description?.includes(`[${USER_ID}]`));
+    return ex ? ex.id : null;
+};
+
 const ensureUserGist = async () => {
     if(userGistId) return true;
     let allGists = [];
@@ -210,8 +236,24 @@ const updateVisibility = () => {
 };
 
 const handleCreateNew = async () => {
-    const n = $('newRouteName').value.trim(), fn = n + '.json', btn = $('btnCreateFile'); if(!n) return; btn.disabled = true; btn.textContent = "...";
-    if(await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [fn]: { content: "[]" } } })) { $('newRouteName').value = ''; setTimeout(() => { refreshFileList(); loadRoute(fn); btn.disabled = false; btn.textContent = "Создать"; showToast("Маршрут создан", 'success'); }, 1000); }
+    const n = $('newRouteName').value.trim(), fn = n + '.json', btn = $('btnCreateFile');
+    if(!n) return;
+    
+    // Создаём гист если его нет
+    const gistOk = await ensureUserGist();
+    if(!gistOk || !userGistId) {
+        btn.disabled = false;
+        btn.textContent = "Создать";
+        showToast("Ошибка подключения к GitHub", 'error');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.textContent = "...";
+    if(await api(`https://api.github.com/gists/${userGistId}`, 'PATCH', { files: { [fn]: { content: "[]" } } })) {
+        $('newRouteName').value = '';
+        setTimeout(() => { refreshFileList(); loadRoute(fn); btn.disabled = false; btn.textContent = "Создать"; showToast("Маршрут создан", 'success'); }, 1000);
+    }
     else { btn.disabled = false; btn.textContent = "Создать"; showToast("Ошибка создания", 'error'); }
 };
 

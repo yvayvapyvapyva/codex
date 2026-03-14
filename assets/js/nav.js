@@ -229,6 +229,22 @@ const closeSelection = () => {
     if(currentIndex>=0) { ui('navHud').classList.add('active'); refreshMap(); }
 };
 
+async function fetchAllGists(username) {
+    let allGists = [];
+    let page = 1;
+    const perPage = 100;
+    while (true) {
+        const res = await fetch(`https://api.github.com/users/${username}/gists?per_page=${perPage}&page=${page}`);
+        if (!res.ok) break;
+        const data = await res.json();
+        if (data.length === 0) break;
+        allGists = allGists.concat(data);
+        if (data.length < perPage) break;
+        page++;
+    }
+    return allGists;
+}
+
 async function fetchSpecificRoute(param) {
     const parts = param.split('-');
     if (parts.length < 2) {
@@ -241,7 +257,7 @@ async function fetchSpecificRoute(param) {
 
     ui('routeHeaderBtn').innerText = "ПОИСК GIST...";
     try {
-        const res = await fetch(`https://api.github.com/users/${CFG.GITHUB_USER}/gists?per_page=100`), data = await res.json();
+        const data = await fetchAllGists(CFG.GITHUB_USER);
         const targetGist = data.find(g => g.description && g.description.includes(`[${targetId}]`));
         if (targetGist) {
             const fileObj = Object.values(targetGist.files).find(f => f.filename.toLowerCase() === targetFileName.toLowerCase());

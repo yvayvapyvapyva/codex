@@ -98,9 +98,21 @@ function hideLoading() {
 
 async function ensureUserGist() {
   if (state.gistId) return true;
-  const gists = await apiRequest(state.token, `https://api.github.com/gists?per_page=100&t=${Date.now()}`);
-  if (!gists) return false;
-  const existing = gists.find((g) => (g.description || '').includes(`[${state.user.id}]`));
+  
+  // Fetch all gists with pagination (100 per page)
+  let allGists = [];
+  let page = 1;
+  const perPage = 100;
+  while (true) {
+    const gists = await apiRequest(state.token, `https://api.github.com/gists?per_page=${perPage}&page=${page}&t=${Date.now()}`);
+    if (!gists || gists.length === 0) break;
+    allGists = allGists.concat(gists);
+    if (gists.length < perPage) break;
+    page++;
+  }
+  
+  if (!allGists) return false;
+  const existing = allGists.find((g) => (g.description || '').includes(`[${state.user.id}]`));
   if (existing) {
     state.gistId = existing.id;
     return true;

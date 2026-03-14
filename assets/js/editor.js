@@ -163,7 +163,25 @@ const handleInitialAuth = async () => {
         showToast("Ошибка авторизации. Проверьте токен.", 'error');
     }
 };
-const ensureUserGist = async () => { if(userGistId) return true; const gists = await api(`https://api.github.com/gists?per_page=100&t=${Date.now()}`); if(!gists) return false; const ex = gists.find(g => g.description?.includes(`[${USER_ID}]`)); if(ex) { userGistId = ex.id; return true; } const cr = await api('https://api.github.com/gists', 'POST', { description: GIST_DESC, public: true, files: { ".init": { content: buildInitFileContent({ source: 'editor' }) } } }); if(cr) { userGistId = cr.id; return true; } return false; };
+const ensureUserGist = async () => {
+    if(userGistId) return true;
+    let allGists = [];
+    let page = 1;
+    const perPage = 100;
+    while (true) {
+        const gists = await api(`https://api.github.com/gists?per_page=${perPage}&page=${page}&t=${Date.now()}`);
+        if(!gists || gists.length === 0) break;
+        allGists = allGists.concat(gists);
+        if (gists.length < perPage) break;
+        page++;
+    }
+    if(!allGists) return false;
+    const ex = allGists.find(g => g.description?.includes(`[${USER_ID}]`));
+    if(ex) { userGistId = ex.id; return true; }
+    const cr = await api('https://api.github.com/gists', 'POST', { description: GIST_DESC, public: true, files: { ".init": { content: buildInitFileContent({ source: 'editor' }) } } });
+    if(cr) { userGistId = cr.id; return true; }
+    return false;
+};
 const renderSettingsFileList = () => {
     const sel = $('settingsRouteSelect');
     if (!sel) return;

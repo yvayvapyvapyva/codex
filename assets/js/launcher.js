@@ -96,10 +96,8 @@ function hideLoading() {
   ui.loading.style.display = 'none';
 }
 
-async function ensureUserGist() {
-  if (state.gistId) return true;
-  
-  // Fetch all gists with pagination (100 per page)
+async function findUserGist() {
+  // Fetch all gists with pagination (100 per page) - только поиск, без создания
   let allGists = [];
   let page = 1;
   const perPage = 100;
@@ -110,13 +108,22 @@ async function ensureUserGist() {
     if (gists.length < perPage) break;
     page++;
   }
-  
-  if (!allGists) return false;
+
+  if (!allGists) return null;
   const existing = allGists.find((g) => (g.description || '').includes(`[${state.user.id}]`));
-  if (existing) {
-    state.gistId = existing.id;
+  return existing ? existing.id : null;
+}
+
+async function ensureUserGist() {
+  if (state.gistId) return true;
+
+  const existingId = await findUserGist();
+  if (existingId) {
+    state.gistId = existingId;
     return true;
   }
+  
+  // Создаём новый гист только если не нашли существующий
   const created = await apiRequest(state.token, 'https://api.github.com/gists', 'POST', {
     description: gistDesc(),
     public: true,
@@ -396,6 +403,9 @@ async function init() {
     return;
   }
 
+  // Ищем существующий гист пользователя (не создаём новый)
+  state.gistId = await findUserGist();
+  
   state.routes = await fetchRoutes();
   hideLoading();
 

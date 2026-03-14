@@ -322,9 +322,15 @@ function updateRouteSettingsButtons() {
 
 const INSTRUCTION_TEXT = `В разработке`;
 
-function openInstruction() {
+async function openInstruction() {
   if (!ui.instructionModal || !ui.instructionText) return;
-  ui.instructionText.textContent = INSTRUCTION_TEXT;
+  try {
+    const response = await fetch('instr.txt');
+    const text = await response.text();
+    ui.instructionText.textContent = text;
+  } catch (e) {
+    ui.instructionText.textContent = 'Не удалось загрузить инструкцию';
+  }
   ui.instructionModal.style.display = 'flex';
 }
 

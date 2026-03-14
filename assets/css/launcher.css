@@ -263,10 +263,15 @@ h1 {
 
 .instruction-text {
   color: #f3f4f6;
-  font-size: 18px;
-  font-weight: 700;
-  text-align: center;
-  padding: 0 20px;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  padding: 20px 30px;
+  max-width: 500px;
+  max-height: 60vh;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.5;
 }
 
 .instruction-close {
